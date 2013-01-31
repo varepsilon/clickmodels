@@ -17,7 +17,7 @@ If you are looking for a serious framework to work with probabilistic graphical 
 ***
 
 # Format of the Click Log
-An example can be found under `data/click_log_sample.tsv`. This is a tab-separated file, where each line has 7 elements. For example, the line `1dd100500	QUERY1	50	0.259109	["http://1", "http://2", "http://3","http://4","http://5","http://6","http://7","http://8","http://9","Http://10"]	[false, false, false, false, true, true, false, false, false, false]	[0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0]` has the following fields:
+A small example can be found under `data/click_log_sample.tsv`. This is a tab-separated file, where each line has 7 elements. For example, the line `1dd100500	QUERY1	50	0.259109	["http://1", "http://2", "http://3","http://4","http://5","http://6","http://7","http://8","http://9","Http://10"]	[false, false, false, false, true, true, false, false, false, false]	[0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0]` has the following fields:
 
 1. `1dd100500` — some identifier (currently not used)
 2. `QUERY1` — text of the query. It can contain any UTF-8 characters except tab sign `\t`
@@ -26,6 +26,10 @@ An example can be found under `data/click_log_sample.tsv`. This is a tab-separat
 5. **json** list of the URLs of the documents that make up SERP (search engine result page). Document's url is an identifier, so in principle you can use any (string) id you want. **NB**: this is not python list, this is creepy json, so mind double quotes and no comma after the last element.
 6. **json** list with the *presentation types* of the documents (see *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).*). **If you do not want to know this** just set it to the list of `false` of the same length as the previous list.
 7. **json** list of clicks. Each element is the number of times corresponding URL was clicked
+
+If you need more data to experiment with you can use any publicly available dataset and convert it to the format described above. For example, you can use a dataset released by one of the Yandex challenges:
+- http://imat-relpred.yandex.ru/en/datasets
+- http://switchdetect.yandex.ru/en/datasets
 
 ***
 
