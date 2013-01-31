@@ -69,9 +69,9 @@ This file contains implementation of all the click models, probabilistic inferen
 ***
 
 # Class Hierarchy
-Also see epydoc-generated [documentation]("./doc/html/index.html") **TODO**: fix the link
+Also see epydoc-generated [documentation](http://htmlpreview.github.com/?https://github.com/varepsilon/clickmodels/blob/master/doc/html/index.html).
 ## Click Models
-![Inheritance Diagram]("./doc/html/class_hierarchy_for_clickmodel.gif") **TODO**: fix the link
+![Inheritance Diagram](https://raw.github.com/varepsilon/clickmodels/master/doc/html/class_hierarchy_for_clickmodel.gif)
 
 The base class for all the click models is the class called `ClickModel`. In order to define a new click model you should create a clas inherited from it and re-define methods `train` and `_getClickProbs`. 
 
