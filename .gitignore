@@ -33,3 +33,6 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# OS specific
+._.DS_Store
