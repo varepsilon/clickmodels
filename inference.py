@@ -26,7 +26,7 @@ USED_MODELS = ['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM'
 
 REL_PRIORS = (0.5, 0.5)
 
-MAX_NUM = 10        # TODO: still hardoded in many places
+MAX_NUM = 10
 
 DEFAULT_REL = REL_PRIORS[1] / sum(REL_PRIORS)
 
@@ -48,7 +48,7 @@ class ClickModel:
 
     def test(self, sessions, reportPositionPerplexity=False):
         logLikelihood = 0.0
-        positionPerplexity = [0.0] * 10
+        positionPerplexity = [0.0] * MAX_NUM
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         for s in sessions:
             iw = s.intentWeight
@@ -61,8 +61,8 @@ class ClickModel:
                 clickProbs2 = self._getClickProbs(s, possibleIntents)
                 y = sum(clickProbs2[i][MAX_NUM // 2] * intentWeight[i] for i in possibleIntents) / sum(clickProbs2[i][MAX_NUM // 2 - 1] * intentWeight[i] for i in possibleIntents)
                 assert abs(x + y - 1) < 0.01, (x, y)
-            logLikelihood += math.log(sum(clickProbs[i][9] * intentWeight[i] for i in possibleIntents))      # log_e
-            for k in xrange(10):
+            logLikelihood += math.log(sum(clickProbs[i][MAX_NUM - 1] * intentWeight[i] for i in possibleIntents))      # log_e
+            for k in xrange(MAX_NUM):
                 # P(C_k | C_1, ..., C_{k-1}) = \sum_I P(C_1, ..., C_k | I) P(I) / \sum_I P(C_1, ..., C_{k-1} | I) P(I)
                 curClick = dict((i, clickProbs[i][k]) for i in possibleIntents)
                 prevClick = dict((i, clickProbs[i][k - 1]) for i in possibleIntents) if k > 0 else dict((i, 1.0) for i in possibleIntents)
@@ -71,16 +71,16 @@ class ClickModel:
         positionPerplexity = [2 ** (-x / N) for x in positionPerplexity]
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
         if reportPositionPerplexity:
-            return logLikelihood / N / 10, perplexity, positionPerplexity
+            return logLikelihood / N / MAX_NUM, perplexity, positionPerplexity
         else:
-            return logLikelihood / N / 10, perplexity
+            return logLikelihood / N / MAX_NUM, perplexity
 
     def _getClickProbs(self, s, possibleIntents):
         """
             Returns clickProbs list
             clickProbs[i][k] = P(C_1, ..., C_k | I=i)
         """
-        return dict((i, [0.5 ** (k + 1) for k in xrange(10)]) for i in possibleIntents)
+        return dict((i, [0.5 ** (k + 1) for k in xrange(MAX_NUM)]) for i in possibleIntents)
 
 
 class DbnModel(ClickModel):
@@ -113,7 +113,7 @@ class DbnModel(ClickModel):
                     positionRelevances[intent] = {}
                     for r in ['a', 's']:
                         positionRelevances[intent][r] = [self.urlRelevances[intent][query][url][r] for url in s.urls]
-                layout = [False] * 11 if self.ignoreLayout else s.layout
+                layout = [False] * (MAX_NUM + 1) if self.ignoreLayout else s.layout
                 sessionEstimate = dict((intent, self._getSessionEstimate(positionRelevances[intent], layout, s.clicks, intent)) for intent in possibleIntents)
 
                 # P(I | C, G)
@@ -124,7 +124,7 @@ class DbnModel(ClickModel):
                     b = sessionEstimate[True]['C'] * s.intentWeight
                     p_I__C_G = {False: a / (a + b), True: b / (a + b)}
                 self.queryIntentsWeights[query].append(p_I__C_G[True])
-                for k in xrange(10):
+                for k in xrange(MAX_NUM):
                     url = s.urls[k]
                     for intent in possibleIntents:
                         # update a
@@ -172,10 +172,10 @@ class DbnModel(ClickModel):
 
     @staticmethod
     def testBackwardForward():
-        positionRelevances = {'a': [0.5] * 10, 's': [0.5] * 10}
+        positionRelevances = {'a': [0.5] * MAX_NUM, 's': [0.5] * MAX_NUM}
         gammas = [0.9] * 4
-        layout = [False] * 11
-        clicks = [0] * 10
+        layout = [False] * (MAX_NUM + 1)
+        clicks = [0] * MAX_NUM
         alpha, beta = DbnModel.getForwardBackwardEstimates(positionRelevances, gammas, layout, clicks, False)
         x = alpha[0][0] * beta[0][0] + alpha[0][1] * beta[0][1]
         assert all(abs((a[0] * b[0] + a[1] * b[1]) / x  - 1) < 0.00001 for a, b in zip(alpha, beta))
@@ -187,14 +187,14 @@ class DbnModel(ClickModel):
 
     @staticmethod
     def getForwardBackwardEstimates(positionRelevances, gammas, layout, clicks, intent):
-        alpha = [[0.0, 0.0] for i in xrange(11)]
-        beta = [[0.0, 0.0] for i in xrange(11)]
+        alpha = [[0.0, 0.0] for i in xrange(MAX_NUM + 1)]
+        beta = [[0.0, 0.0] for i in xrange(MAX_NUM + 1)]
         alpha[0] = [0.0, 1.0]
-        beta[10] = [1.0, 1.0]
+        beta[MAX_NUM] = [1.0, 1.0]
 
         # P(E_{k+1} = e, C_k | E_k = e', G, I)
-        updateMatrix = [[[0.0 for e1 in [0, 1]] for e in [0, 1]] for i in xrange(10)]
-        for k in xrange(10):
+        updateMatrix = [[[0.0 for e1 in [0, 1]] for e in [0, 1]] for i in xrange(MAX_NUM)]
+        for k in xrange(MAX_NUM):
             C_k = clicks[k]
             a_u = positionRelevances['a'][k]
             s_u = positionRelevances['s'][k]
@@ -210,17 +210,17 @@ class DbnModel(ClickModel):
                 updateMatrix[k][1][0] = 0
                 updateMatrix[k][1][1] = gamma * (1 - s_u) * a_u
 
-        for k in xrange(10):
+        for k in xrange(MAX_NUM):
             for e in [0, 1]:
                 alpha[k + 1][e] = sum(alpha[k][e1] * updateMatrix[k][e][e1] for e1 in [0, 1])
-                beta[9 - k][e] = sum(beta[10 - k][e1] * updateMatrix[9 - k][e1][e] for e1 in [0, 1])
+                beta[MAX_NUM - 1 - k][e] = sum(beta[MAX_NUM - k][e1] * updateMatrix[MAX_NUM - 1 - k][e1][e] for e1 in [0, 1])
 
         return alpha, beta
 
     def _getSessionEstimate(self, positionRelevances, layout, clicks, intent):
         # Returns {'a': P(A_k | I, C, G), 's': P(S_k | I, C, G), 'C': P(C | I, G), 'clicks': P(C_k | C_1, ..., C_{k-1}, I, G)} as a dict
         # sessionEstimate[True]['a'][k] = P(A_k = 1 | I = 'Fresh', C, G), probability of A_k = 0 can be calculated as 1 - p
-        sessionEstimate = {'a': [0.0] * 10, 's': [0.0] * 10, 'e': [[0.0, 0.0] for k in xrange(10)], 'C': 0.0, 'clicks': [0.0] * 10}
+        sessionEstimate = {'a': [0.0] * MAX_NUM, 's': [0.0] * MAX_NUM, 'e': [[0.0, 0.0] for k in xrange(MAX_NUM)], 'C': 0.0, 'clicks': [0.0] * MAX_NUM}
 
         alpha, beta = self.getForwardBackwardEstimates(positionRelevances, self.gammas, layout, clicks, intent)
         try:
@@ -229,10 +229,10 @@ class DbnModel(ClickModel):
             print >>sys.stderr, alpha, beta, [(a[0] * b[0] + a[1] * b[1]) for a, b in zip(alpha, beta)], positionRelevances
             sys.exit(1)
         if DEBUG:
-            assert all(ph[0] < 0.01 for ph, c in zip(varphi[:10], clicks[:10]) if c != 0), (alpha, beta, varphi, clicks)
+            assert all(ph[0] < 0.01 for ph, c in zip(varphi[:MAX_NUM], clicks[:MAX_NUM]) if c != 0), (alpha, beta, varphi, clicks)
         # calculate P(C | I, G) for k = 0
         sessionEstimate['C'] = alpha[0][0] * beta[0][0] + alpha[0][1] * beta[0][1]      # == 0 + 1 * beta[0][1]
-        for k in xrange(10):
+        for k in xrange(MAX_NUM):
             C_k = clicks[k]
             a_u = positionRelevances['a'][k]
             s_u = positionRelevances['s'][k]
@@ -259,7 +259,7 @@ class DbnModel(ClickModel):
             positionRelevances[intent] = {}
             for r in ['a', 's']:
                 positionRelevances[intent][r] = [self.urlRelevances[intent][s.query][url][r] for url in s.urls]
-        layout = [False] * 11 if self.ignoreLayout else s.layout
+        layout = [False] * (MAX_NUM + 1) if self.ignoreLayout else s.layout
         return dict((i, self._getSessionEstimate(positionRelevances[i], layout, s.clicks, i)['clicks']) for i in possibleIntents)
 
 
@@ -274,8 +274,8 @@ class SimplifiedDbnModel(DbnModel):
         urlRelFractions = [defaultdict(lambda: {'a': [1.0, 1.0], 's': [1.0, 1.0]}) for q in xrange(MAX_QUERY_ID)]
         for s in sessions:
             query = s.query
-            lastClickedPos = 9
-            for k, c in enumerate(s.clicks[:10]):
+            lastClickedPos = MAX_NUM - 1
+            for k, c in enumerate(s.clicks[:MAX_NUM]):
                 if c != 0:
                     lastClickedPos = k
             for k, (u, c) in enumerate(zip(s.urls, s.clicks[:(lastClickedPos + 1)])):
@@ -309,9 +309,9 @@ class UbmModel(ClickModel):
         # alpha: intent -> query -> url -> "attractiveness probability"
         self.alpha = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
         # gamma: freshness of the current result: gammaType -> rank -> "distance from the last click" - 1 -> examination probability
-        self.gamma = [[[0.5 for d in xrange(10)] for r in xrange(10)] for g in xrange(self.gammaTypesNum)]
+        self.gamma = [[[0.5 for d in xrange(MAX_NUM)] for r in xrange(MAX_NUM)] for g in xrange(self.gammaTypesNum)]
         if self.explorationBias:
-            self.e = [0.5 for p in xrange(10)]
+            self.e = [0.5 for p in xrange(MAX_NUM)]
         if not PRETTY_LOG:
             print >>sys.stderr, '-' * 80
             print >>sys.stderr, 'Start. Current time is', datetime.now()
@@ -319,16 +319,16 @@ class UbmModel(ClickModel):
             self.queryIntentsWeights = defaultdict(lambda: [])
             # not like in DBN! xxxFractions[0] is a numerator while xxxFraction[1] is a denominator
             alphaFractions = dict((i, [defaultdict(lambda: [1.0, 2.0]) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
-            gammaFractions = [[[[1.0, 2.0] for d in xrange(10)] for r in xrange(10)] for g in xrange(self.gammaTypesNum)]
+            gammaFractions = [[[[1.0, 2.0] for d in xrange(MAX_NUM)] for r in xrange(MAX_NUM)] for g in xrange(self.gammaTypesNum)]
             if self.explorationBias:
-                eFractions = [[1.0, 2.0] for p in xrange(10)]
+                eFractions = [[1.0, 2.0] for p in xrange(MAX_NUM)]
             # E-step
             for s in sessions:
                 query = s.query
-                layout = [False] * 11 if self.ignoreLayout else s.layout
+                layout = [False] * (MAX_NUM + 1) if self.ignoreLayout else s.layout
                 if self.explorationBias:
-                    explorationBiasPossible = any(s.layout[k] and s.clicks[k] for k in xrange(10))      # C_v == 1 in "Beyond 10 blue links..." notation
-                    firstVertical = -1 if not any(s.layout[:10]) else [k for k in xrange(10) if s.layout[k]][0]
+                    explorationBiasPossible = any(s.layout[k] and s.clicks[k] for k in xrange(MAX_NUM))      # C_v == 1 in "Beyond 10 blue links..." notation
+                    firstVertical = -1 if not any(s.layout[:MAX_NUM]) else [k for k in xrange(MAX_NUM) if s.layout[k]][0]
                 if self.ignoreIntents:
                     p_I__C_G = {False: 1.0, True: 0}
                 else:
@@ -337,7 +337,7 @@ class UbmModel(ClickModel):
                     p_I__C_G = {False: a / (a + b), True: b / (a + b)}
                 self.queryIntentsWeights[query].append(p_I__C_G[True])
                 prevClick = -1
-                for rank, c in enumerate(s.clicks[:10]):
+                for rank, c in enumerate(s.clicks[:MAX_NUM]):
                     url = s.urls[rank]
                     for intent in possibleIntents:
                         a = self.alpha[intent][query][url]
@@ -377,15 +377,15 @@ class UbmModel(ClickModel):
                         num_points += 1
                         self.alpha[i][q][url] = new_alpha
             for g in xrange(self.gammaTypesNum):
-                for r in xrange(10):
-                    for d in xrange(10):
+                for r in xrange(MAX_NUM):
+                    for d in xrange(MAX_NUM):
                         gF = gammaFractions[g][r][d]
                         new_gamma = gF[0] / gF[1]
                         sum_square_displacement += (self.gamma[g][r][d] - new_gamma) ** 2
                         num_points += 1
                         self.gamma[g][r][d] = new_gamma
             if self.explorationBias:
-                for p in xrange(10):
+                for p in xrange(MAX_NUM):
                     new_e = eFractions[p][0] / eFractions[p][1]
                     sum_square_displacement += (self.e[p] - new_e) ** 2
                     num_points += 1
@@ -404,7 +404,7 @@ class UbmModel(ClickModel):
 
     def _getSessionProb(self, s):
         clickProbs = self._getClickProbs(s, [False, True])
-        return clickProbs[False][9] / clickProbs[True][9]
+        return clickProbs[False][MAX_NUM - 1] / clickProbs[True][MAX_NUM - 1]
 
     @staticmethod
     def getGamma(gammas, k, prevClick, layout, intent):
@@ -417,10 +417,10 @@ class UbmModel(ClickModel):
             clickProbs[i][k] = P(C_1, ..., C_k | I=i)
         """
         clickProbs = dict((i, []) for i in possibleIntents)
-        firstVertical = -1 if not any(s.layout[:10]) else [k for k in xrange(10) if s.layout[k]][0]
+        firstVertical = -1 if not any(s.layout[:MAX_NUM]) else [k for k in xrange(MAX_NUM) if s.layout[k]][0]
         prevClick = -1
-        layout = [False] * 11 if self.ignoreLayout else s.layout
-        for rank, c in enumerate(s.clicks[:10]):
+        layout = [False] * (MAX_NUM + 1) if self.ignoreLayout else s.layout
+        for rank, c in enumerate(s.clicks[:MAX_NUM]):
             url = s.urls[rank]
             prob = {False: 0.0, True: 0.0}
             for i in possibleIntents:
@@ -450,12 +450,12 @@ class DcmModel(ClickModel):
     def train(self, sessions):
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         urlRelFractions = dict((i, [defaultdict(lambda: [1.0, 1.0]) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
-        gammaFractions = [[[1.0, 1.0] for g in xrange(self.gammaTypesNum)] for r in xrange(10)]
+        gammaFractions = [[[1.0, 1.0] for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_NUM)]
         for s in sessions:
             query = s.query
-            layout = [False] * 11 if self.ignoreLayout else s.layout
-            lastClickedPos = 9
-            for k, c in enumerate(s.clicks[:10]):
+            layout = [False] * (MAX_NUM + 1) if self.ignoreLayout else s.layout
+            lastClickedPos = MAX_NUM - 1
+            for k, c in enumerate(s.clicks[:MAX_NUM]):
                 if c != 0:
                     lastClickedPos = k
             intentWeights = {False: 1.0} if self.ignoreIntents else {False: 1 - s.intentWeight, True: s.intentWeight}
@@ -470,24 +470,24 @@ class DcmModel(ClickModel):
                     else:
                         urlRelFractions[i][query][u][0] += intentWeights[i]
         self.urlRelevances = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
-        self.gammas = [[0.5 for g in xrange(self.gammaTypesNum)] for r in xrange(10)]
+        self.gammas = [[0.5 for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_NUM)]
         for i in possibleIntents:
             for query, d in enumerate(urlRelFractions[i]):
                 if not d:
                     continue
                 for url, relFractions in d.iteritems():
                     self.urlRelevances[i][query][url] = relFractions[1] / (relFractions[1] + relFractions[0])
-        for k in xrange(10):
+        for k in xrange(MAX_NUM):
             for g in xrange(self.gammaTypesNum):
                 self.gammas[k][g] = gammaFractions[k][g][0] / (gammaFractions[k][g][0] + gammaFractions[k][g][1])
 
     def _getClickProbs(self, s, possibleIntents):
         clickProbs = {False: [], True: []}          # P(C_1, ..., C_k)
         query = s.query
-        layout = [False] * 11 if self.ignoreLayout else s.layout
+        layout = [False] * (MAX_NUM + 1) if self.ignoreLayout else s.layout
         for i in possibleIntents:
             examinationProb = 1.0       # P(C_1, ..., C_{k - 1}, E_k = 1)
-            for k, c in enumerate(s.clicks[:10]):
+            for k, c in enumerate(s.clicks[:MAX_NUM]):
                 r = self.urlRelevances[i][query][s.urls[k]]
                 prevProb = 1 if k == 0 else clickProbs[i][-1]
                 if c == 0:
@@ -517,9 +517,11 @@ class InputReader:
         for line in f:
             hash_digest, query, region, intentWeight, urls, layout, clicks = line.rstrip().split('\t')
             urls, layout, clicks = map(json.loads, [urls, layout, clicks])
-            if len(urls) != 10:
+            if len(urls) < MAX_NUM:
                 continue
-            if self.discardNoClicks and all(c == 0 for c in clicks[:10]):
+            else:
+                urls = urls[:MAX_NUM]
+            if self.discardNoClicks and all(c == 0 for c in clicks[:MAX_NUM]):
                 continue
             if float(intentWeight) > 1 or float(intentWeight) < 0:
                 continue
@@ -582,7 +584,7 @@ if __name__ == '__main__':
         # Relevance -> P(Leave | Click, Relevance)
         p_L_C_R_frac = defaultdict(lambda: [0, 0.0001])
         for s in sessions:
-            lastClickPos = max((i for i, c in enumerate(s.clicks[:10]) if c != 0))
+            lastClickPos = max((i for i, c in enumerate(s.clicks[:MAX_NUM]) if c != 0))
             for i in xrange(lastClickPos + 1):
                 u = s.urls[i]
                 if s.clicks[i] != 0:
@@ -599,9 +601,9 @@ if __name__ == '__main__':
     if 'DBN' in USED_MODELS:
         print 'Will going to run no more than: %.1f hours (approx)' % ((len(allCombinations) + len(interestingValues)) * MAX_ITERATIONS / 60 * len(sessions) / 1E6)
 
-    #clickProbs = [0] * 10
+    #clickProbs = [0] * MAX_NUM
     #for s in sessions:
-        #for i in xrange(10):
+        #for i in xrange(MAX_NUM):
             #clickProbs[i] += s.clicks[i]
     #print '\t'.join(str(float(x) / len(sessions)) for x in clickProbs)
     #sys.exit(0)
@@ -633,9 +635,9 @@ if __name__ == '__main__':
             print '\n'.join(['%s\t%f' % r for r in \
                     [(x, ubmModel.alpha[False][0][x]) for x in \
                             ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']]])
-            for d in xrange(10):
-                for r in xrange(10):
-                    print ('%.4f ' % (ubmModel.gamma[0][r][9-d] if r + d >= 9 else 0)),
+            for d in xrange(MAX_NUM):
+                for r in xrange(MAX_NUM):
+                    print ('%.4f ' % (ubmModel.gamma[0][r][MAX_NUM - 1 - d] if r + d >= MAX_NUM - 1 else 0)),
                 print
         print 'UBM', ubmModel.test(testSessions)
         del ubmModel       # needed to minimize memory consumption (see gc.collect() below)
