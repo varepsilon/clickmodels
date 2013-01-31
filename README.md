@@ -8,11 +8,12 @@ If you are looking for a serious framework to work with probabilistic graphical 
 ***
 
 # Models Implemented
-- *Dynamic Bayesian Network* (**DBN**) model: Chapelle, O. and Zhang, Y. 2009. A dynamic bayesian network click model for web search ranking. WWW (2009).
-- *User Browsing Model* (**UBM**): Dupret, G. and Piwowarski, B. 2008. A user browsing model to predict search engine click data from past observations. SIGIR (2008).
-- *Exploration Bias User Browsing Model* (**EB_UBM**): Chen, D. et al. 2012. Beyond ten blue links: enabling user click modeling in federated web search. WSDM (2012).
-- *Dependent Click Model* (**DCM**): Guo, F. et al. 2009. Efficient multiple-click models in web search. WSDM (2009).
-- *Intent-Aware Models* (**DBN-IA, UBM-IA, EB_UBM-IA, DCM-IA**): Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).
+- *Dynamic Bayesian Network* ( **DBN** ) model: Chapelle, O. and Zhang, Y. 2009. A dynamic bayesian network click model for web search ranking. WWW (2009).
+- *User Browsing Model* ( **UBM** ): Dupret, G. and Piwowarski, B. 2008. A user browsing model to predict search engine click data from past observations. SIGIR (2008).
+- *Exploration Bias User Browsing Model* ( **EB_UBM** ): Chen, D. et al. 2012. Beyond ten blue links: enabling user click modeling in federated web search. WSDM (2012).
+- *Dependent Click Model* ( **DCM** ): Guo, F. et al. 2009. Efficient multiple-click models in web search. WSDM (2009).
+- *Intent-Aware Models* ( **DBN-IA, UBM-IA, EB_UBM-IA, DCM-IA** ): Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).
+
 ***
 
 # Format of the Click Log
@@ -66,6 +67,7 @@ This file contains implementation of all the click models, probabilistic inferen
 - `DEBUG` — perform some additional tests when running algorithm (makes it slower)
 - `PRETTY_LOG` — make log output prettier. If `False` then more information is put into log.
 - `USED_MODELS` — list of model names to be tested in `__main__` section of the script. Possible names are `['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']`. Please refer to the `__main__` section itself to see how these names are expressed in terms of our class hierarchy (all those nasty `if 'XXX' in USED_MODELS:…`).
+
 ***
 
 # Class Hierarchy
@@ -82,7 +84,7 @@ Note, that `test` method is already implemented and uses `_getClickProbs` functi
 `ClickModel` class by itself represents a baseline click model which sets probability 0.5 to any click event.
 
 ### DbnModel
-This class is, in fact an implementation of general **DBN-IA** model (*Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).*) that makes use of intent and presentation type of the documents when `ignoreIntent` and/or `ignoreLayout` is set to `False`. The `train` method is a probabilistic EM inference.
+This class is, in fact an implementation of general **DBN-IA** model ( *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).* ) that makes use of intent and presentation type of the documents when `ignoreIntent` and/or `ignoreLayout` is set to `False`. The `train` method is a probabilistic EM inference.
 
 If all what you want is just original DBN model by Chapelle et al. you should creat it as `DbnModel((0.9, 0.9, 0.9, 0.9))` (`ignoreIntent` and `ignoreLayout` is `True` by default).
 
@@ -109,6 +111,7 @@ This class intented to read input (click log) in the format described above. To 
 
 # Performance Issues
 If you experience performance issues consider using [PyPy](http://pypy.org/) instead of regular cPython. It may lead to 10x spead up.
+
 ***
 
 <!--# TRAIN_FOR_METRIC (TODO: unfinished)-->
