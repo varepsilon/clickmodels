@@ -1,0 +1,52 @@
+.more_fresh {
+    font-size: 80%;
+}
+
+.fresh_link {
+    font-size: 150%;
+}
+
+.serp_item {
+    margin: 20px;
+}
+
+.title {
+    font-size: 120%;
+}
+
+.link {
+    color: green;
+}
+
+.b-serp-item__date {
+    font-weight: bold;
+    margin-right: 5px;
+    color: 310062;
+    background-color: c7fcec;
+}
+
+.assessment {
+    float:right;
+    display:none;
+}
+
+.assessment input{
+    cursor: pointer;
+}
+
+.assessment label {
+    cursor: pointer;
+}
+
+input[type=submit] {
+    position:fixed;
+    right:2px;
+    top:2px;
+    height:30px;
+    _position:absolute;
+    _top:documentElement.scrollTop+screen.height*0.002;
+}
+
+h1 {
+    margin-top: 40px;
+}
