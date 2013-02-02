@@ -1,12 +1,11 @@
-#!/usr/bin/env pypy
+#!/usr/bin/env python
 #coding: utf-8
 
 # Input format: hash \t query \t region \t intent_probability \t urls list (json) \t layout (json) \t clicks (json)
 
 import sys
 import gc
-import simplejson as json
-#import json as json
+import json
 import math
 
 from collections import defaultdict, namedtuple
