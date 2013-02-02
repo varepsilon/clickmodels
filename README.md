@@ -27,7 +27,7 @@ A small example can be found under `data/click_log_sample.tsv`. This is a tab-se
 6. **json** list with the *presentation types* of the documents (see *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).*). **If you do not want to know this** just set it to the list of `false` of the same length as the previous list.
 7. **json** list of clicks. Each element is the number of times corresponding URL was clicked
 
-If you need more data to experiment with you can use any publicly available dataset and convert it to the format described above. For example, you can use a dataset released by one of the Yandex challenges:
+If you need more data to experiment with you can use any publicly available dataset and convert it to the format described above. For example, you can use a dataset provided by one of the Yandex challenges (you need to register to get access to the data):
 - http://imat-relpred.yandex.ru/en/datasets
 - http://switchdetect.yandex.ru/en/datasets
 
