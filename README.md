@@ -117,6 +117,7 @@ This class intented to read input (click log) in the format described above. To 
 
 # Performance Issues
 If you experience performance issues consider using [PyPy](http://pypy.org/) instead of regular cPython. It may lead to 10x spead up.
+You can also install and use [simplejson](http://pypi.python.org/pypi/simplejson/) module instead of `json`.
 
 ***
 
