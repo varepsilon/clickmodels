@@ -24,7 +24,7 @@ A small example can be found under `data/click_log_sample.tsv`. This is a tab-se
 3. `50` — integer identifier of the region (country, city) of the user who submitted the query. At Yandex user region is heavily used by ranking, so throughout the code the pair `(query, region)` is used to identify query, i.e. the same query issued from the different regions considered as a different query. **If it is not what you want**, just put the some constant (e.g. `0`) in this column.
 4. `0.259109` — float value, corresponding to the probability `P(I = F)` that user had *special* intent F. In all the scripts we assume that user has one of the two intents: *special* intent F with probability `P(I = F)` and regular *web* intent with probability `1 - P(I = F)`. See *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).* for more details. **If you do not want all this intent stuff** just put `0` in this column.
 5. **json** list of the URLs of the documents that make up SERP (search engine result page). Document's url is an identifier, so in principle you can use any (string) id you want. **NB**: this is not python list, this is creepy json, so mind double quotes and no comma after the last element.
-6. **json** list with the *presentation types* of the documents (see *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).*). **If you do not want to know this** just set it to the list of `false` of the same length as the previous list.
+6. **json** list with the *presentation types* of the documents (see *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).* ). **If you do not want to know this** just set it to the list of `false` of the same length as the previous list.
 7. **json** list of clicks. Each element is the number of times corresponding URL was clicked
 
 If you need more data to experiment with you can use any publicly available dataset and convert it to the format described above. For example, you can use a dataset provided by one of the Yandex challenges (you need to register to get access to the data):
@@ -43,6 +43,9 @@ this file
 ## makeGluedSERP.py 
 **{not used by other scripts}**
 Create html of the SERP containing fresh block item. This is use to illustrate the notion of *presentation types* used by Intent-Aware models. Run as: `./makeGluedSERP.py < data/serp_sample.json`. Output is placed in `html` subdirectory. **WARNING:** all previously generated html files in this directory will be removed
+
+## data/
+`data/` directory contains an example of click log (see format description above) as well as two examples of result pages with fresh block included (see `makeGluedSERP.py` description above): `data/serp_sample.json` is used in an example above, while `data/serp_sample2.json` was used to create a picture in the paper *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).*
 
 ## bootstrap.py, quantile.py
 **{used by `testSignificance.py`}**
