@@ -15,11 +15,6 @@ MIN_PAGE_LEN = 0.66 * END_PAGE
 SEED = 42
 LANG = 'en'
 
-RELEVANCE_SCALE = {
-    'ru': ['НЕ НАШЁЛ', 'ПРОДОЛЖУ ИСКАТЬ', 'ИНФОРМАЦИЯ НАЙДЕНА'],
-    'en': ['NOT FOUND', 'CONTINUE SEARCHING', 'INFORMATION FOUND'],
-}
-
 def genFreshYaURL(query):
     return 'http://yandex.{}/yandsearch?text={}&xjst=1&time_from=-3dE'.format(
             LANG,
@@ -28,20 +23,13 @@ def genFreshYaURL(query):
 
 
 def genSERPItem(index, title, snippet, url, fresh=False):
-    scale = RELEVANCE_SCALE[LANG]
-    x = ''.join('''<input type="radio" name="mark-{0}" id="result{0}-{1}" value="{1}" />
-        <label for="result{0}-{1}">{2}</label>
-    '''.format(index, k[0], k[1]) for k in enumerate(scale))
     return '''
 <li class="serp_item {3}">
     <a class="title" href="{2}">{0}</a>
     <div class="snippet">{1}</div>
     <a class="link" href="{2}">{2}</a>
-    <span class="assessment">
-{4}
-    </span>
 </li>
-    '''.format(title, snippet, url, 'fresh_item' if fresh else 'web_item', x)
+    '''.format(title, snippet, url, 'fresh_item' if fresh else 'web_item')
 
 
 def genBeginGlue(query):
@@ -85,7 +73,6 @@ def genSERP(query, id, web_results, fresh_results, layout):
     <h1>{} "{}"</h1>
 <body>
 <ol class="result_list">
-<form name="assessments" action="http://daiquiri.yandex.ru:8000/{}/save" method="POST">
     '''.format(
             'Найдено по запросу ' if LANG == 'ru' else 'Results for the query',
             query,
@@ -93,12 +80,10 @@ def genSERP(query, id, web_results, fresh_results, layout):
     )
 
     tail = '''
-<input type="submit" value="{}" />
-</form>
 </ol>
 </body>
 </html>
-    '''.format('Перейти к следующему заданию' if LANG == 'ru' else 'Next task')
+    '''
 
     body_list = []
     web_count = 0
