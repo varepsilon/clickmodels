@@ -69,7 +69,9 @@ This file contains implementation of all the click models, probabilistic inferen
 - **Input**: click log in the format described above (`sys.stdin`)
 - **Output** (assume that `TRAIN_FOR_METRIC = False`): `ModelName (LogLikelihood, Perplexity)`
 
-### Variables:
+## config.py
+**{used by `inference.py`}**
+This is the file where you should setup your code. The default settings for parameters are set in `config_sample.py`.
 - `MAX_ITERATIONS` — maximum number of iterations in Expectation Maximization (EM) algorithm (applicable only for models using EM algorithm)
 - `DEBUG` — perform some additional tests when running algorithm (makes it slower)
 - `PRETTY_LOG` — make log output prettier. If `False` then more information is put into log.
