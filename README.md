@@ -75,7 +75,7 @@ This is the file where you should setup your code. The default settings for para
 - `MAX_ITERATIONS` — maximum number of iterations in Expectation Maximization (EM) algorithm (applicable only for models using EM algorithm)
 - `DEBUG` — perform some additional tests when running algorithm (makes it slower)
 - `PRETTY_LOG` — make log output prettier. If `False` then more information is put into log.
-- `USED_MODELS` — list of model names to be tested in `__main__` section of the script. Possible names are `['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']`. Please refer to the `__main__` section itself to see how these names are expressed in terms of our class hierarchy (all those nasty `if 'XXX' in USED_MODELS:…`).
+- `USED_MODELS` — list of model names to be tested in `__main__` section of the script. Possible names are `['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']`. Please refer to the `__main__` section of `inference.py` to see how these names are expressed in terms of our class hierarchy (all those nasty `if 'XXX' in USED_MODELS:…`).
 - `MAX_NUM` – number of documents per query. Set to 10 by default as most of search engines return list of 10 doucments.
 - `TRAIN_FOR_METRIC` – if `True` the model will be trained such that its parameters can be used in a metric (like *Expected Browsing Utility* (EBU) by Yilmaz et al.). See below for more details
 
