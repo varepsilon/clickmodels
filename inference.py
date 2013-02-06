@@ -10,22 +10,9 @@ import math
 
 from collections import defaultdict, namedtuple
 from datetime import datetime
-
-################################################################################
-
-MAX_ITERATIONS = 40
-DEBUG = True
-PRETTY_LOG = True
-
-TRAIN_FOR_METRIC = False
-
-USED_MODELS = ['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']
-
-################################################################################
+from config import *
 
 REL_PRIORS = (0.5, 0.5)
-
-MAX_NUM = 10
 
 DEFAULT_REL = REL_PRIORS[1] / sum(REL_PRIORS)
 

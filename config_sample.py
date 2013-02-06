@@ -1,0 +1,8 @@
+MAX_ITERATIONS = 40
+DEBUG = True
+PRETTY_LOG = True
+USED_MODELS = ['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']
+MAX_NUM = 10
+
+TRAIN_FOR_METRIC = False
+
