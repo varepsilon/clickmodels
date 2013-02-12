@@ -32,7 +32,7 @@ class ClickModel:
         """
         pass
 
-    def test(self, sessions, reportPositionPerplexity=False):
+    def test(self, sessions, reportPositionPerplexity=True):
         logLikelihood = 0.0
         positionPerplexity = [0.0] * MAX_NUM
         counts = [0] * MAX_NUM
