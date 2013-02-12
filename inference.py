@@ -18,7 +18,7 @@ DEFAULT_REL = REL_PRIORS[1] / sum(REL_PRIORS)
 
 MAX_QUERY_ID = 1000     # some initial value that is changed by InputReader
 
-SessionItem = namedtuple('SessionItem', ['intentWeight', 'query', 'urls', 'layout', 'clicks'])
+SessionItem = namedtuple('SessionItem', ['intentWeight', 'query', 'urls', 'layout', 'clicks', 'extraclicks'])
 
 class ClickModel:
 
@@ -503,6 +503,15 @@ class InputReader:
         for line in f:
             hash_digest, query, region, intentWeight, urls, layout, clicks = line.rstrip().split('\t')
             urls, layout, clicks = map(json.loads, [urls, layout, clicks])
+            extra = {}
+            if EXTENDED_LOG_FORMAT:
+                urls, extra = self.convertToList(urls)
+                if DEBUG:
+                    assert not extra
+                layout, extra = self.convertToList(layout, False, MAX_LEN + 1)
+                if DEBUG:
+                    assert not extra
+                clicks, extra = self.convertToList(clicks)
             if len(urls) < MAX_NUM:
                 continue
             else:
@@ -541,11 +550,24 @@ class InputReader:
                         url_ids.append(urlid)
                     self.url_to_id[u] = urlid
                     self.current_url_id += 1
-            sessions.append(SessionItem(intentWeight, query_id, url_ids, layout, clicks))
+            sessions.append(SessionItem(intentWeight, query_id, url_ids, layout, clicks, extra))
         # FIXME: bad style
         global MAX_QUERY_ID
         MAX_QUERY_ID = self.current_query_id
         return sessions
+
+    @staticfunction
+    def convertToList(sparseDict, defaultElem=0, maxLen=MAX_LEN):
+        """ Convert dict of the format {"1": 1, "13": 2} to the list of the length MAX_LEN """
+        convertedList = [defaultElem] * maxLen
+        extra = {}
+        for k, v in sparseDict.iteritems():
+            try:
+                convertedList[int(k)] = v
+            except (ValueError, IndexError):
+                extra[k] = v
+        return convertedList, extra
+
 
 if __name__ == '__main__':
     if DEBUG:
