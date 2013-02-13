@@ -613,14 +613,12 @@ class InputReader:
             newClicks = []
             pagerClicks = [int(k[len('page_'):]) for (k, v) in s.extraclicks.iteritems() if k.startswith('page_') and v]
             pagerClicks.sort()
-            if not pagerClicks:
-                return s
             # FIXME: ensure that PAGER item is always added (even if it is not clicked)
-            if pagerClicks != range(1, pagerClicks[-1] + 1) or pagerClicks[-1] < (len(s.urls) - 1) // SERP_SIZE:
+            if pagerClicks and (pagerClicks != range(pagerClicks[0], pagerClicks[-1] + 1) or pagerClicks[-1] < (len(s.urls) - 1) // SERP_SIZE):
                 return False
             a = 0
-            for pagerC in pagerClicks:
-                b = pagerC * SERP_SIZE
+            for page in range(1, len(s.urls) // SERP_SIZE + 1):
+                b = page * SERP_SIZE
                 if b > len(s.urls):
                     break
                 newUrls += s.urls[a:b]
@@ -629,11 +627,16 @@ class InputReader:
                 newLayout += s.layout[a:b]
                 newLayout.append(False)
                 newClicks += s.clicks[a:b]
-                newClicks.append(1)
+                newClicks.append(0)
                 a = b
             newUrls += s.urls[a:]
             newClicks += s.clicks[a:]
             newLayout += s.layout[a:]
+            for pC in pagerClicks:
+                try:
+                    newClicks[pC * (SERP_SIZE + 1) - 1] = 1
+                except IndexError:
+                    break
             if DEBUG:
                 assert len(newUrls) == len(newClicks)
                 assert len(newUrls) + 1 == len(newLayout), (len(newUrls), len(newLayout))
@@ -692,14 +695,14 @@ if __name__ == '__main__':
 
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
     print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if s.extraclicks.get('TRANSFORMED', False)])
-    clickProbs = [0.0] * MAX_NUM
-    counts = [0] * MAX_NUM
-    for s in sessions:
-        for i, c in enumerate(s.clicks):
-            clickProbs[i] += (1 if c else 0)
-            counts[i] += 1
-    print '\t'.join((str(x / cnt if cnt else x) for (x, cnt) in zip(clickProbs, counts)))
-    sys.exit(0)
+#    clickProbs = [0.0] * MAX_NUM
+    #counts = [0] * MAX_NUM
+    #for s in sessions:
+        #for i, c in enumerate(s.clicks):
+            #clickProbs[i] += (1 if c else 0)
+            #counts[i] += 1
+    #print '\t'.join((str(x / cnt if cnt else x) for (x, cnt) in zip(clickProbs, counts)))
+    #sys.exit(0)
 
     if 'Baseline' in USED_MODELS:
         baselineModel = ClickModel()
