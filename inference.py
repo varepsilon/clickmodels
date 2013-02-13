@@ -262,6 +262,10 @@ class DbnModel(ClickModel):
             positionRelevances[intent] = {}
             for r in ['a', 's']:
                 positionRelevances[intent][r] = [self.urlRelevances[intent][s.query][url][r] for url in s.urls]
+                for k, u in enumerate(s.urls):
+                    if u == 'PAGER':
+                        # use dummy 0 query for all fake pager URLs
+                        positionRelevances[intent][r][k] = self.urlRelevances[intent][0][url][r]
         layout = [False] * len(s.layout) if self.ignoreLayout else s.layout
         return dict((i, self._getSessionEstimate(positionRelevances[i], layout, s.clicks, i)['clicks']) for i in possibleIntents)
 
@@ -282,6 +286,12 @@ class SimplifiedDbnModel(DbnModel):
                 if c != 0:
                     lastClickedPos = k
             for k, (u, c) in enumerate(zip(s.urls, s.clicks[:(lastClickedPos + 1)])):
+                tmpQuery = query
+                if u == 'PAGER':
+                    assert TRANSFORMED_LOG
+                    # the same dummy query for all pagers
+                    query = 0
+
                 if c != 0:
                     urlRelFractions[query][u]['a'][1] += 1
                     if k == lastClickedPos:
@@ -290,6 +300,7 @@ class SimplifiedDbnModel(DbnModel):
                         urlRelFractions[query][u]['s'][0] += 1
                 else:
                     urlRelFractions[query][u]['a'][0] += 1
+                query = tmpQuery
         self.urlRelevances = dict((i, [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) for q in xrange(MAX_QUERY_ID)]) for i in [False])
         for query, d in enumerate(urlRelFractions):
             if not d:
