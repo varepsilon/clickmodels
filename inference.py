@@ -55,12 +55,17 @@ class ClickModel:
                 y = sum(clickProbs2[i][N // 2] * intentWeight[i] for i in possibleIntents) / sum(clickProbs2[i][N // 2 - 1] * intentWeight[i] for i in possibleIntents)
                 assert abs(x + y - 1) < 0.01, (x, y)
             logLikelihood += math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents))      # log_e
+            correctedRank = 0    # we are going to skip clicks on fake pager urls
             for k in xrange(len(s.clicks)):
                 # P(C_k | C_1, ..., C_{k-1}) = \sum_I P(C_1, ..., C_k | I) P(I) / \sum_I P(C_1, ..., C_{k-1} | I) P(I)
-                curClick = dict((i, clickProbs[i][k]) for i in possibleIntents)
-                prevClick = dict((i, clickProbs[i][k - 1]) for i in possibleIntents) if k > 0 else dict((i, 1.0) for i in possibleIntents)
-                positionPerplexity[k] += math.log(sum(curClick[i] * intentWeight[i] for i in possibleIntents), 2) - math.log(sum(prevClick[i] * intentWeight[i] for i in possibleIntents), 2)
-                counts[k] += 1
+                curClick = dict((i, clickProbs[i][correctedRank]) for i in possibleIntents)
+                prevClick = dict((i, clickProbs[i][correctedRank - 1]) for i in possibleIntents) if correctedRank > 0 else dict((i, 1.0) for i in possibleIntents)
+                positionPerplexity[correctedRank] += math.log(sum(curClick[i] * intentWeight[i] for i in possibleIntents), 2) - math.log(sum(prevClick[i] * intentWeight[i] for i in possibleIntents), 2)
+                counts[correctedRank] += 1
+                if s.extraclicks.get('TRANSFORMED', False) and (k + 1) % 10 == 0:
+                    continue
+                else:
+                    correctedRank += 1
         positionPerplexity = [2 ** (-x / count if count else x) for (x, count) in zip(positionPerplexity, counts)]
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
         N = len(sessions)
@@ -575,7 +580,7 @@ class InputReader:
         return sessions
 
     @staticmethod
-    def convertToList(sparseDict, defaultElem=0, maxLen=MAX_NUM):
+    def convertToList(sparseDict, defaultElem=0, maxLen=MAX_NUM - MAX_NUM // SERP_SIZE):
         """ Convert dict of the format {"1": 1, "13": 2} to the list of the length MAX_NUM """
         convertedList = [defaultElem] * maxLen
         extra = {}
@@ -587,11 +592,33 @@ class InputReader:
         return convertedList, extra
 
     @staticmethod
-    def mergeExtraToSession(s):
+    def mergeExtraToSessionItem(s):
         """ Put pager click into the session item (presented as a fake URL) """
-# TODO
-        s.extraclicks
-        pass
+        if not s.extraclicks or s.extraclicks.get('TRANSFORMED', False):
+            return s
+        else:
+            newUrls = []
+            newLayout = []
+            newClicks = []
+            pagerClicks = [int(k[len('page_'):]) for (k, v) in s.extraclicks.iteritems() if k.startswith('page_') and v]
+            pagerClicks.sort()
+            if pagerClicks != range(pagerClicks[0], pagerClicks[-1]):
+                return False
+            b = 0
+            for pagerC in pagerClicks:
+                b = pagerC * SERP_SIZE
+                a = b - SERP_SIZE
+                newUrls += s.urls[a:b]
+                # TODO: try different fake urls for different result pages (page_1, page_2, etc.)
+                newUrls.append('PAGER')
+                newLayout += s.layout[a:b]
+                newLayout.append(False)
+                newClicks += s.clicks[a:b]
+                newClicks.append(1)
+            newUrls += s.urls[b:(b+SERP_SIZE)]
+            newLayout += s.layout[b:(b+SERP_SIZE)]
+            newClicks += s.clicks[b:(b+SERP_SIZE)]
+            return SessionItem(s.intentWeight, s.query, newUrls, newLayout, newClicks, {'TRANSFORMED': True})
 
 
 if __name__ == '__main__':
@@ -637,6 +664,10 @@ if __name__ == '__main__':
     else:
         testSessions = sessions
     del readInput       # needed to minimize memory consumption (see gc.collect() below)
+
+    if TRANSFORMED_LOG:
+        for ss in [sessions, testSessions]:
+            ss = [x for x in (InputReader.mergeExtraToSessionItem(s) for s in ss) if x]
 
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
 
