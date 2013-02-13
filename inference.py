@@ -615,6 +615,7 @@ class InputReader:
             pagerClicks.sort()
             if not pagerClicks:
                 return s
+            # FIXME: ensure that PAGER item is always added (even if it is not clicked)
             if pagerClicks != range(1, pagerClicks[-1] + 1) or pagerClicks[-1] < (len(s.urls) - 1) // SERP_SIZE:
                 return False
             a = 0
@@ -691,6 +692,14 @@ if __name__ == '__main__':
 
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
     print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if s.extraclicks.get('TRANSFORMED', False)])
+    clickProbs = [0.0] * MAX_NUM
+    counts = [0] * MAX_NUM
+    for s in sessions:
+        for i, c in enumerate(s.clicks):
+            clickProbs[i] += (1 if c else 0)
+            counts[i] += 1
+    print '\t'.join((str(x / cnt if cnt else x) for (x, cnt) in zip(clickProbs, counts)))
+    sys.exit(0)
 
     if 'Baseline' in USED_MODELS:
         baselineModel = ClickModel()
@@ -700,6 +709,7 @@ if __name__ == '__main__':
     if 'SDBN' in USED_MODELS:
         sdbnModel = SimplifiedDbnModel()
         sdbnModel.train(sessions)
+        print sdbnModel.urlRelevances[False][0]['PAGER']
         print 'SDBN:', sdbnModel.test(testSessions)
         del sdbnModel        # needed to minimize memory consumption (see gc.collect() below)
 
