@@ -16,7 +16,7 @@ REL_PRIORS = (0.5, 0.5)
 
 DEFAULT_REL = REL_PRIORS[1] / sum(REL_PRIORS)
 
-MAX_QUERY_ID = 1000     # some initial value that is changed by InputReader
+MAX_QUERY_ID = 1000     # some initial value that will be updated by InputReader
 
 SessionItem = namedtuple('SessionItem', ['intentWeight', 'query', 'urls', 'layout', 'clicks'])
 
@@ -544,7 +544,7 @@ class InputReader:
             sessions.append(SessionItem(intentWeight, query_id, url_ids, layout, clicks))
         # FIXME: bad style
         global MAX_QUERY_ID
-        MAX_QUERY_ID = self.current_query_id
+        MAX_QUERY_ID = self.current_query_id + 1
         return sessions
 
 if __name__ == '__main__':
