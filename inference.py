@@ -60,7 +60,7 @@ class ClickModel:
                 prevClick = dict((i, clickProbs[i][k - 1]) for i in possibleIntents) if k > 0 else dict((i, 1.0) for i in possibleIntents)
                 positionPerplexity[k] += math.log(sum(curClick[i] * intentWeight[i] for i in possibleIntents), 2) - math.log(sum(prevClick[i] * intentWeight[i] for i in possibleIntents), 2)
                 counts[k] += 1
-        positionPerplexity = [2 ** (-x / count) for (x, count) in zip(positionPerplexity, counts)]
+        positionPerplexity = [2 ** (-x / count if count else x) for (x, count) in zip(positionPerplexity, counts)]
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
         N = len(sessions)
         if reportPositionPerplexity:
@@ -532,7 +532,7 @@ class InputReader:
                 layout = layout[:urlsObserved]
                 clicks = clicks[:urlsObserved]
             if urlsObserved < MIN_NUM:
-                break
+                continue
             if self.discardNoClicks and not any(clicks):
                 continue
             if float(intentWeight) > 1 or float(intentWeight) < 0:
@@ -623,16 +623,6 @@ if __name__ == '__main__':
             print 'P(C|%s)\t%f\tP(L|C,%s)\t%f' % (u, float(p_C_R_frac[u][0]) / p_C_R_frac[u][1], u, float(p_L_C_R_frac[u][0]) / p_L_C_R_frac[u][1])
         # --------------------------------------------------------------------------------
 
-    if 'DBN' in USED_MODELS:
-        print 'Will going to run no more than: %.1f hours (approx)' % ((len(allCombinations) + len(interestingValues)) * MAX_ITERATIONS / 60 * len(sessions) / 1E6)
-
-    #clickProbs = [0] * MAX_NUM
-    #for s in sessions:
-        #for i in xrange(MAX_NUM):
-            #clickProbs[i] += s.clicks[i]
-    #print '\t'.join(str(float(x) / len(sessions)) for x in clickProbs)
-    #sys.exit(0)
-
     if len(sys.argv) > 1:
         with open(sys.argv[1]) as test_clicks_file:
             testSessions = readInput(test_clicks_file)
@@ -640,7 +630,7 @@ if __name__ == '__main__':
         testSessions = sessions
     del readInput       # needed to minimize memory consumption (see gc.collect() below)
 
-    print len(sessions), len(testSessions)
+    print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
 
     if 'Baseline' in USED_MODELS:
         baselineModel = ClickModel()
