@@ -37,6 +37,7 @@ class ClickModel:
         pass
 
     def test(self, sessions, reportPositionPerplexity=True):
+        # TODO: separate evaluation for the sessions with fake pager urls (need to skip positions 10, 21, 32, etc.)
         logLikelihood = 0.0
         positionPerplexity = [0.0] * MAX_NUM
         counts = [0] * MAX_NUM
@@ -584,6 +585,13 @@ class InputReader:
             except (ValueError, IndexError):
                 extra[k] = v
         return convertedList, extra
+
+    @staticmethod
+    def mergeExtraToSession(s):
+        """ Put pager click into the session item (presented as a fake URL) """
+# TODO
+        s.extraclicks
+        pass
 
 
 if __name__ == '__main__':
