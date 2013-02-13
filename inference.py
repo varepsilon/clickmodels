@@ -10,7 +10,11 @@ import math
 
 from collections import defaultdict, namedtuple
 from datetime import datetime
-from config import *
+
+try:
+    from config import *
+except:
+    from config_sample import *
 
 REL_PRIORS = (0.5, 0.5)
 
