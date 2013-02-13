@@ -37,7 +37,6 @@ class ClickModel:
         pass
 
     def test(self, sessions, reportPositionPerplexity=True):
-        # TODO: separate evaluation for the sessions with fake pager urls (need to skip positions 10, 21, 32, etc.)
         logLikelihood = 0.0
         positionPerplexity = [0.0] * MAX_NUM
         counts = [0] * MAX_NUM
@@ -57,15 +56,16 @@ class ClickModel:
             logLikelihood += math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents))      # log_e
             correctedRank = 0    # we are going to skip clicks on fake pager urls
             for k in xrange(len(s.clicks)):
+                if s.extraclicks.get('TRANSFORMED', False) and (k + 1) % (SERP_SIZE + 1) == 0:
+                    if DEBUG:
+                        assert s.urls[k] == 'PAGER'
+                    continue
                 # P(C_k | C_1, ..., C_{k-1}) = \sum_I P(C_1, ..., C_k | I) P(I) / \sum_I P(C_1, ..., C_{k-1} | I) P(I)
-                curClick = dict((i, clickProbs[i][correctedRank]) for i in possibleIntents)
-                prevClick = dict((i, clickProbs[i][correctedRank - 1]) for i in possibleIntents) if correctedRank > 0 else dict((i, 1.0) for i in possibleIntents)
+                curClick = dict((i, clickProbs[i][k]) for i in possibleIntents)
+                prevClick = dict((i, clickProbs[i][k - 1]) for i in possibleIntents) if k > 0 else dict((i, 1.0) for i in possibleIntents)
                 positionPerplexity[correctedRank] += math.log(sum(curClick[i] * intentWeight[i] for i in possibleIntents), 2) - math.log(sum(prevClick[i] * intentWeight[i] for i in possibleIntents), 2)
                 counts[correctedRank] += 1
-                if s.extraclicks.get('TRANSFORMED', False) and (k + 1) % 10 == 0:
-                    continue
-                else:
-                    correctedRank += 1
+                correctedRank += 1
         positionPerplexity = [2 ** (-x / count if count else x) for (x, count) in zip(positionPerplexity, counts)]
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
         N = len(sessions)
@@ -580,7 +580,7 @@ class InputReader:
         return sessions
 
     @staticmethod
-    def convertToList(sparseDict, defaultElem=0, maxLen=MAX_NUM - MAX_NUM // SERP_SIZE):
+    def convertToList(sparseDict, defaultElem=0, maxLen=(MAX_NUM - MAX_NUM // SERP_SIZE)):
         """ Convert dict of the format {"1": 1, "13": 2} to the list of the length MAX_NUM """
         convertedList = [defaultElem] * maxLen
         extra = {}
@@ -602,12 +602,15 @@ class InputReader:
             newClicks = []
             pagerClicks = [int(k[len('page_'):]) for (k, v) in s.extraclicks.iteritems() if k.startswith('page_') and v]
             pagerClicks.sort()
-            if pagerClicks != range(pagerClicks[0], pagerClicks[-1]):
+            if not pagerClicks:
+                return s
+            if pagerClicks != range(1, pagerClicks[-1] + 1) or pagerClicks[-1] < (len(s.urls) - 1) // SERP_SIZE:
                 return False
-            b = 0
+            a = 0
             for pagerC in pagerClicks:
                 b = pagerC * SERP_SIZE
-                a = b - SERP_SIZE
+                if b > len(s.urls):
+                    break
                 newUrls += s.urls[a:b]
                 # TODO: try different fake urls for different result pages (page_1, page_2, etc.)
                 newUrls.append('PAGER')
@@ -615,9 +618,14 @@ class InputReader:
                 newLayout.append(False)
                 newClicks += s.clicks[a:b]
                 newClicks.append(1)
-            newUrls += s.urls[b:(b+SERP_SIZE)]
-            newLayout += s.layout[b:(b+SERP_SIZE)]
-            newClicks += s.clicks[b:(b+SERP_SIZE)]
+                a = b
+            newUrls += s.urls[a:]
+            newClicks += s.clicks[a:]
+            newLayout += s.layout[a:]
+            if DEBUG:
+                assert len(newUrls) == len(newClicks)
+                assert len(newUrls) + 1 == len(newLayout), (len(newUrls), len(newLayout))
+                assert len(newUrls) < len(s.urls) + MAX_NUM / SERP_SIZE, (len(s.urls), len(newUrls))
             return SessionItem(s.intentWeight, s.query, newUrls, newLayout, newClicks, {'TRANSFORMED': True})
 
 
@@ -666,10 +674,12 @@ if __name__ == '__main__':
     del readInput       # needed to minimize memory consumption (see gc.collect() below)
 
     if TRANSFORMED_LOG:
-        for ss in [sessions, testSessions]:
-            ss = [x for x in (InputReader.mergeExtraToSessionItem(s) for s in ss) if x]
+        sessions, testSessions = ([x for x in (InputReader.mergeExtraToSessionItem(s) for s in ss) if x] for ss in [sessions, testSessions])
+    else:
+        sessions, testSessions = ([s for s in ss if InputReader.mergeExtraToSessionItem(s)] for ss in [sessions, testSessions])
 
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
+    print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if s.extraclicks.get('TRANSFORMED', False)])
 
     if 'Baseline' in USED_MODELS:
         baselineModel = ClickModel()
