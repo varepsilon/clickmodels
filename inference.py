@@ -521,9 +521,9 @@ class InputReader:
             if EXTENDED_LOG_FORMAT:
                 urls, _ = self.convertToList(urls, '')
                 for u in urls:
-                    urlsObserved += 1
                     if u == '':
                         break
+                    urlsObserved += 1
                 urls = urls[:urlsObserved]
                 layout, _ = self.convertToList(layout, False, urlsObserved)
                 clicks, extra = self.convertToList(clicks, 0, urlsObserved)
