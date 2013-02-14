@@ -681,7 +681,7 @@ if __name__ == '__main__':
         sessions, testSessions = ([s for s in ss if InputReader.mergeExtraToSessionItem(s)] for ss in [sessions, testSessions])
 
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
-    print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if s.extraclicks.get('TRANSFORMED', False)])
+    print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if len(s.urls) > SERP_SIZE + 1])
 #    clickProbs = [0.0] * MAX_NUM
     #counts = [0] * MAX_NUM
     #for s in sessions:
