@@ -682,14 +682,14 @@ if __name__ == '__main__':
 
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
     print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if len(s.urls) > SERP_SIZE + 1])
-#    clickProbs = [0.0] * MAX_NUM
-    #counts = [0] * MAX_NUM
-    #for s in sessions:
-        #for i, c in enumerate(s.clicks):
-            #clickProbs[i] += 1 if c else 0
-            #counts[i] += 1
-    #print '\t'.join((str(x / cnt if cnt else x) for (x, cnt) in zip(clickProbs, counts)))
-    #sys.exit(0)
+    clickProbs = [0.0] * MAX_NUM
+    counts = [0] * MAX_NUM
+    for s in sessions:
+        for i, c in enumerate(s.clicks):
+            clickProbs[i] += 1 if c else 0
+            counts[i] += 1
+    print '\t'.join((str(x / cnt if cnt else x) for (x, cnt) in zip(clickProbs, counts)))
+    sys.exit(0)
 
     if 'Baseline' in USED_MODELS:
         baselineModel = ClickModel()
