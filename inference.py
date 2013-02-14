@@ -605,38 +605,25 @@ class InputReader:
     @staticmethod
     def mergeExtraToSessionItem(s):
         """ Put pager click into the session item (presented as a fake URL) """
-        if not s.extraclicks or s.extraclicks.get('TRANSFORMED', False):
+        if s.extraclicks.get('TRANSFORMED', False):
             return s
         else:
             newUrls = []
             newLayout = []
             newClicks = []
-            pagerClicks = [int(k[len('page_'):]) for (k, v) in s.extraclicks.iteritems() if k.startswith('page_') and v]
-            pagerClicks.sort()
-            # FIXME: ensure that PAGER item is always added (even if it is not clicked)
-            if pagerClicks and (pagerClicks != range(pagerClicks[0], pagerClicks[-1] + 1) or pagerClicks[-1] < (len(s.urls) - 1) // SERP_SIZE):
-                return False
             a = 0
-            for page in range(1, len(s.urls) // SERP_SIZE + 1):
-                b = page * SERP_SIZE
-                if b > len(s.urls):
-                    break
+            while a + SERP_SIZE <= len(s.urls):
+                b = a + SERP_SIZE
                 newUrls += s.urls[a:b]
+                newLayout += s.layout[a:b]
+                newClicks += s.clicks[a:b]
                 # TODO: try different fake urls for different result pages (page_1, page_2, etc.)
                 newUrls.append('PAGER')
-                newLayout += s.layout[a:b]
                 newLayout.append(False)
-                newClicks += s.clicks[a:b]
-                newClicks.append(0)
+                newClicks.append(1)
                 a = b
-            newUrls += s.urls[a:]
-            newClicks += s.clicks[a:]
-            newLayout += s.layout[a:]
-            for pC in pagerClicks:
-                try:
-                    newClicks[pC * (SERP_SIZE + 1) - 1] = 1
-                except IndexError:
-                    break
+            newClicks[-1] = 0 if a == len(s.urls) else 1
+            newLayout.append(False)
             if DEBUG:
                 assert len(newUrls) == len(newClicks)
                 assert len(newUrls) + 1 == len(newLayout), (len(newUrls), len(newLayout))
@@ -699,7 +686,7 @@ if __name__ == '__main__':
     #counts = [0] * MAX_NUM
     #for s in sessions:
         #for i, c in enumerate(s.clicks):
-            #clickProbs[i] += (1 if c else 0)
+            #clickProbs[i] += 1 if c else 0
             #counts[i] += 1
     #print '\t'.join((str(x / cnt if cnt else x) for (x, cnt) in zip(clickProbs, counts)))
     #sys.exit(0)
