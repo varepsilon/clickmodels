@@ -270,7 +270,7 @@ class DbnModel(ClickModel):
             positionRelevances[intent] = {}
             for r in ['a', 's']:
                 positionRelevances[intent][r] = [self.urlRelevances[intent][s.query][url][r] for url in s.urls]
-                if QUERY_INDEPENDET_PAGER:
+                if QUERY_INDEPENDENT_PAGER:
                     for k, u in enumerate(s.urls):
                         if u == 'PAGER':
                             # use dummy 0 query for all fake pager URLs
@@ -296,7 +296,7 @@ class SimplifiedDbnModel(DbnModel):
                     lastClickedPos = k
             for k, (u, c) in enumerate(zip(s.urls, s.clicks[:(lastClickedPos + 1)])):
                 tmpQuery = query
-                if QUERY_INDEPENDET_PAGER and u == 'PAGER':
+                if QUERY_INDEPENDENT_PAGER and u == 'PAGER':
                     assert TRANSFORMED_LOG
                     # the same dummy query for all pagers
                     query = 0
@@ -309,7 +309,7 @@ class SimplifiedDbnModel(DbnModel):
                         urlRelFractions[query][u]['s'][0] += 1
                 else:
                     urlRelFractions[query][u]['a'][0] += 1
-                if QUERY_INDEPENDET_PAGER:
+                if QUERY_INDEPENDENT_PAGER:
                     query = tmpQuery
         self.urlRelevances = dict((i, [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) for q in xrange(MAX_QUERY_ID)]) for i in [False])
         for query, d in enumerate(urlRelFractions):
