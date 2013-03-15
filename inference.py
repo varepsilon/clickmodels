@@ -73,8 +73,8 @@ class ClickModel:
                 countsClickSkip[correctedRank][click] += 1
                 correctedRank += 1
         positionPerplexity = [2 ** (-x / count if count else x) for (x, count) in zip(positionPerplexity, counts)]
-        positionPerplexityClickSkip = [[2 ** (-x / count if count else x) for (x, count) in \
-                zip(positionPerplexityClickSkip[click], counts[click])] for click in xrange(1)]
+        positionPerplexityClickSkip = [[2 ** (-x[click] / (count[click] if count[click] else 1) if count else x) \
+                for (x, count) in zip(positionPerplexityClickSkip, countsClickSkip)] for click in xrange(2)]
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
         N = len(sessions)
         if reportPositionPerplexity:
