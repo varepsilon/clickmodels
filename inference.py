@@ -39,7 +39,9 @@ class ClickModel:
     def test(self, sessions, reportPositionPerplexity=True):
         logLikelihood = 0.0
         positionPerplexity = [0.0] * MAX_NUM
+        positionPerplexityClickSkip = [[0.0, 0.0] for i in xrange(MAX_NUM)]
         counts = [0] * MAX_NUM
+        countsClickSkip = [[0, 0] for i in xrange(MAX_NUM)]
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         for s in sessions:
             iw = s.intentWeight
@@ -55,7 +57,8 @@ class ClickModel:
                 assert abs(x + y - 1) < 0.01, (x, y)
             logLikelihood += math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents))      # log_e
             correctedRank = 0    # we are going to skip clicks on fake pager urls
-            for k in xrange(len(s.clicks)):
+            for k, click in enumerate(s.clicks):
+                click = 1 if click else 0
                 if s.extraclicks.get('TRANSFORMED', False) and (k + 1) % (SERP_SIZE + 1) == 0:
                     if DEBUG:
                         assert s.urls[k] == 'PAGER'
@@ -63,14 +66,19 @@ class ClickModel:
                 # P(C_k | C_1, ..., C_{k-1}) = \sum_I P(C_1, ..., C_k | I) P(I) / \sum_I P(C_1, ..., C_{k-1} | I) P(I)
                 curClick = dict((i, clickProbs[i][k]) for i in possibleIntents)
                 prevClick = dict((i, clickProbs[i][k - 1]) for i in possibleIntents) if k > 0 else dict((i, 1.0) for i in possibleIntents)
-                positionPerplexity[correctedRank] += math.log(sum(curClick[i] * intentWeight[i] for i in possibleIntents), 2) - math.log(sum(prevClick[i] * intentWeight[i] for i in possibleIntents), 2)
+                logProb = math.log(sum(curClick[i] * intentWeight[i] for i in possibleIntents), 2) - math.log(sum(prevClick[i] * intentWeight[i] for i in possibleIntents), 2)
+                positionPerplexity[correctedRank] += logProb
+                positionPerplexityClickSkip[correctedRank][click] += logProb
                 counts[correctedRank] += 1
+                countsClickSkip[correctedRank][click] += 1
                 correctedRank += 1
         positionPerplexity = [2 ** (-x / count if count else x) for (x, count) in zip(positionPerplexity, counts)]
+        positionPerplexityClickSkip = [[2 ** (-x / count if count else x) for (x, count) in \
+                zip(positionPerplexityClickSkip[click], counts[click])] for click in xrange(1)]
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
         N = len(sessions)
         if reportPositionPerplexity:
-            return logLikelihood / N / MAX_NUM, perplexity, positionPerplexity
+            return logLikelihood / N / MAX_NUM, perplexity, positionPerplexity, positionPerplexityClickSkip
         else:
             return logLikelihood / N / MAX_NUM, perplexity
 
