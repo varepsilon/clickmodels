@@ -523,9 +523,11 @@ class InputReader:
             url_ids = []
             for u in urls:
                 if u in ['_404', 'STUPID', 'VIRUS', 'SPAM']:
+                    # convert Yandex-specific fields to standard ones
                     assert TRAIN_FOR_METRIC
                     u = 'IRRELEVANT'
                 if u.startswith('RELEVANT_'):
+                    # convert Yandex-specific fields to standard ones
                     assert TRAIN_FOR_METRIC
                     u = 'RELEVANT'
                 if u in self.url_to_id:
