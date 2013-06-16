@@ -1,6 +1,6 @@
 # [ClickModels](https://github.com/varepsilon/clickmodels)
 
-ClickModels is a small set of Python scripts for the user click models developed at [Yandex](http://company.yandex.com). A *Click Model* is a probabilistic graphical model used to predict search engine click data from past observations.
+ClickModels is a small set of Python scripts for the user click models initially developed at [Yandex](http://company.yandex.com). A *Click Model* is a probabilistic graphical model used to predict search engine click data from past observations.
 This project is aimed to deal with click models used in Information Retrieval (see next section) and intended to be easy-to-read and easy-to-modify. If it's not, please let me know how to improve it :)
 
 If you are looking for a serious framework to work with probabilistic graphical models you might want to examine [Infer.NET](http://research.microsoft.com/en-us/um/cambridge/projects/infernet/). It should also work with IronPython.
