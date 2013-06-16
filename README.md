@@ -3,6 +3,8 @@
 ClickModels is a small set of Python scripts for the user click models initially developed at [Yandex](http://company.yandex.com). A *Click Model* is a probabilistic graphical model used to predict search engine click data from past observations.
 This project is aimed to deal with click models used in Information Retrieval (see next section) and intended to be easy-to-read and easy-to-modify. If it's not, please let me know how to improve it :)
 
+If you are using this code for your research work, consider citing [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search) or [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics) if appropriate.
+
 If you are looking for a serious framework to work with probabilistic graphical models you might want to examine [Infer.NET](http://research.microsoft.com/en-us/um/cambridge/projects/infernet/). It should also work with IronPython.
 
 ***
@@ -12,8 +14,7 @@ If you are looking for a serious framework to work with probabilistic graphical 
 - *User Browsing Model* ( **UBM** ): Dupret, G. and Piwowarski, B. 2008. A user browsing model to predict search engine click data from past observations. SIGIR (2008).
 - *Exploration Bias User Browsing Model* ( **EB_UBM** ): Chen, D. et al. 2012. Beyond ten blue links: enabling user click modeling in federated web search. WSDM (2012).
 - *Dependent Click Model* ( **DCM** ): Guo, F. et al. 2009. Efficient multiple-click models in web search. WSDM (2009).
-- *Intent-Aware Models* ( **DBN-IA, UBM-IA, EB_UBM-IA, DCM-IA** ): Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).
-
+- *Intent-Aware Models* ( **DBN-IA, UBM-IA, EB_UBM-IA, DCM-IA** ): [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)
 ***
 
 # Format of the Click Log
@@ -22,9 +23,9 @@ A small example can be found under `data/click_log_sample.tsv`. This is a tab-se
 1. `1dd100500` — some identifier (currently not used)
 2. `QUERY1` — text of the query. It can contain any UTF-8 characters except tab sign `\t`
 3. `50` — integer identifier of the region (country, city) of the user who submitted the query. At Yandex user region is heavily used by ranking, so throughout the code the pair `(query, region)` is used to identify query, i.e. the same query issued from the different regions considered as a different query. **If it is not what you want**, just put the some constant (e.g. `0`) in this column.
-4. `0.259109` — float value, corresponding to the probability `P(I = F)` that user had *special* intent F. In all the scripts we assume that user has one of the two intents: *special* intent F with probability `P(I = F)` and regular *web* intent with probability `1 - P(I = F)`. See *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).* for more details. **If you do not want all this intent stuff** just put `0` in this column.
+4. `0.259109` — float value, corresponding to the probability `P(I = F)` that user had *special* intent F. In all the scripts we assume that user has one of the two intents: *special* intent F with probability `P(I = F)` and regular *web* intent with probability `1 - P(I = F)`. See [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013)](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search) for more details. **If you do not want all this intent stuff** just put `0` in this column.
 5. **json** list of the URLs of the documents that make up SERP (search engine result page). Document's url is an identifier, so in principle you can use any (string) id you want. **NB**: this is not python list, this is creepy json, so mind double quotes and no comma after the last element.
-6. **json** list with the *presentation types* of the documents (see *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).* ). **If you do not want to know this** just set it to the list of `false` of the same length as the previous list.
+6. **json** list with the *presentation types* of the documents (see [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)). **If you do not want to know this** just set it to the list of `false` of the same length as the previous list.
 7. **json** list of clicks. Each element is the number of times corresponding URL was clicked
 
 If you need more data to experiment with you can use any publicly available dataset and convert it to the format described above. For example, you can use a dataset provided by one of the Yandex challenges (you need to register to get access to the data):
@@ -45,7 +46,7 @@ this file
 Create html of the SERP containing fresh block item. This is use to illustrate the notion of *presentation types* used by Intent-Aware models. Run as: `./makeGluedSERP.py < data/serp_sample.json`. Output is placed in `html` subdirectory. **WARNING:** all previously generated html files in this directory will be removed
 
 ## data/
-`data/` directory contains an example of click log (see format description above) as well as two examples of result pages with fresh block included (see `makeGluedSERP.py` description above): `data/serp_sample.json` is used in an example above, while `data/serp_sample2.json` was used to create a picture in the paper *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).*
+`data/` directory contains an example of click log (see format description above) as well as two examples of result pages with fresh block included (see `makeGluedSERP.py` description above): `data/serp_sample.json` is used in an example above, while `data/serp_sample2.json` was used to create a picture in the paper [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)
 
 ## bootstrap.py, quantile.py
 **{used by `testSignificance.py`}**
@@ -95,7 +96,7 @@ Note, that `test` method is already implemented and uses `_getClickProbs` functi
 `ClickModel` class by itself represents a baseline click model which sets probability 0.5 to any click event.
 
 ### DbnModel
-This class is, in fact an implementation of general **DBN-IA** model ( *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).* ) that makes use of intent and presentation type of the documents when `ignoreIntent` and/or `ignoreLayout` is set to `False`. The `train` method is a probabilistic EM inference.
+This class is, in fact an implementation of general **DBN-IA** model ([Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search) ) that makes use of intent and presentation type of the documents when `ignoreIntent` and/or `ignoreLayout` is set to `False`. The `train` method is a probabilistic EM inference.
 
 If all what you want is just original DBN model by Chapelle et al. you should creat it as `DbnModel((0.9, 0.9, 0.9, 0.9))` (`ignoreIntent` and `ignoreLayout` is `True` by default).
 
@@ -103,7 +104,7 @@ If all what you want is just original DBN model by Chapelle et al. you should cr
 This is the same as `DbnModel((1.0, 1.0, 1.0, 1.0), ignoreIntents, ignoreLayout)`, but `train` method is just counting instead of EM algorithm. See *Chapelle, O. and Zhang, Y. 2009. A Dynamic Bayesian Network click model for web search ranking. WWW (2009).*, Section 5 (Algorithm 1).
 
 ### UbmModel
-This is the most general case for all UBM-like models. Changing `ignoreIntents`, `ignoreLayout` and `explorationBias` parameters you can get different models: **UBM, UBM-intent, UBM-layout, UBM-IA, EB_UBM, EB_UBM-intent, EB_UBM-layout, EB_UBM-IA** (for the names see *Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).*).
+This is the most general case for all UBM-like models. Changing `ignoreIntents`, `ignoreLayout` and `explorationBias` parameters you can get different models: **UBM, UBM-intent, UBM-layout, UBM-IA, EB_UBM, EB_UBM-intent, EB_UBM-layout, EB_UBM-IA** (for the names see [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)).
 
 ### EbUbmModel (UbmModel)
 Just a shortcut for `UbmModel(ignoreIntents, ignoreLayout, explorationBias=True)` which correspond to the model called *Exploration Bias UBM* in *Chen, D. et al. 2012. Beyond ten blue links: enabling user click modeling in federated web search. WSDM (2012).*
@@ -127,7 +128,9 @@ You can also install and use [simplejson](http://pypi.python.org/pypi/simplejson
 ***
 
 # TRAIN_FOR_METRIC
-If you set `TRAIN_FOR_METRIC = True` the code will expect you to provide document relevances instead of urls. A model will then be trained to assign the same attractiveness / satisfaction probabilities to all the documents with the same relevance. More details to follow.
+If you set `TRAIN_FOR_METRIC = True` the code will expect you to provide document relevances instead of urls. A model will then be trained to assign the same attractiveness / satisfaction probabilities to all the documents with the same relevance.
+
+For more conceptual details please refer to [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)
 
 # Copyright and License
 Copyright © [Yandex](http://company.yandex.com) 2012-2013, [varepsilon](https://varepsilon.github.io) 2012-∞
