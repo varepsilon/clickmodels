@@ -5,4 +5,5 @@ USED_MODELS = ['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM'
 MAX_NUM = 10
 
 TRAIN_FOR_METRIC = False
+PRINT_EBU_STATS = True
 

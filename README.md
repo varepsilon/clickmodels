@@ -73,12 +73,14 @@ This file contains implementation of all the click models, probabilistic inferen
 ## config.py
 **{used by `inference.py`}**
 This is the file where you should setup your code. The default settings for parameters are set in `config_sample.py`.
+
 - `MAX_ITERATIONS` — maximum number of iterations in Expectation Maximization (EM) algorithm (applicable only for models using EM algorithm)
 - `DEBUG` — perform some additional tests when running algorithm (makes it slower)
 - `PRETTY_LOG` — make log output prettier. If `False` then more information is put into log.
 - `USED_MODELS` — list of model names to be tested in `__main__` section of the script. Possible names are `['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']`. Please refer to the `__main__` section of `inference.py` to see how these names are expressed in terms of our class hierarchy (all those nasty `if 'XXX' in USED_MODELS:…`).
 - `MAX_NUM` – number of documents per query. Set to 10 by default as most of search engines return list of 10 doucments.
-- `TRAIN_FOR_METRIC` – if `True` the model will be trained such that its parameters can be used in a metric (like *Expected Browsing Utility* (EBU) by Yilmaz et al.). See below for more details
+- `TRAIN_FOR_METRIC` – if `True` the model will be trained such that its parameters can be used in a metric (like [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)). See below for more details.
+- `PRINT_EBU_STATS` — if `True` the parameters of the EBU metric will be printed first (*Yilmaz, E. et al. 2010. Expected browsing utility for web search evaluation. CIKM. (2010)*)
 
 ***
 
@@ -128,8 +130,25 @@ You can also install and use [simplejson](http://pypi.python.org/pypi/simplejson
 ***
 
 # TRAIN_FOR_METRIC
-If you set `TRAIN_FOR_METRIC = True` the code will expect you to provide document relevances instead of urls. A model will then be trained to assign the same attractiveness / satisfaction probabilities to all the documents with the same relevance.
+If you set `TRAIN_FOR_METRIC = True` the code will expect you to provide document relevances instead of urls. We make an assumption, that document attractiveness and/or satisfaction probability only depends on its human-assigned relevance grade.  A model will then be trained to assign the same attractiveness / satisfaction probabilities to all the documents with the same relevance.
 
+## Input Format
+The format in this case is similar to the one descirbed above with only difference that URLs should be replaced by the relevance grade of the corresponding document to the corresponding query. The query field will be ignored in that case. The relevance grade should take one of the following values:
+
+- `IRRELEVANT` — lowest relevance scorn, document is not relevant to the query
+- `RELEVANT` — combines marginally relevant and just relevant documents
+- `USEFUL` — document is more than just relevant, it is really useful
+- `VITAL` — highest relevance score, the document is essential
+
+Please note, that if you also have `PRINT_EBU_STATS` set to `True`, then the parameters of the EBU / rrDBN metric will be printed out first (these ones can be computed directly without need to train a model).
+
+## Output
+For each model corresponding parametres will be printed out:
+
+- `UBM` — attractiveness probabilities `alpha` and position discount parameters `gamma`
+- `DCM` — attractiveness probabilities `alpha` (named as `urlRelevances` in the code) and position discount parameters `gamma`
+
+## More Details
 For more conceptual details please refer to [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)
 
 # Copyright and License

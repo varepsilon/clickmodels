@@ -563,10 +563,10 @@ if __name__ == '__main__':
     readInput = InputReader()
     sessions = readInput(sys.stdin)
 
-    if TRAIN_FOR_METRIC:
-        # --------------------------------------------------------------------------------
+    if TRAIN_FOR_METRIC and PRINT_EBU_STATS:
+        # ---------------------------------------------------------------
         #                           For EBU
-        # --------------------------------------------------------------------------------
+        # ---------------------------------------------------------------
         # Relevance -> P(Click | Relevance)
         p_C_R_frac = defaultdict(lambda: [0, 0.0001])
         # Relevance -> P(Leave | Click, Relevance)
@@ -584,7 +584,7 @@ if __name__ == '__main__':
 
         for u in ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']:
             print 'P(C|%s)\t%f\tP(L|C,%s)\t%f' % (u, float(p_C_R_frac[u][0]) / p_C_R_frac[u][1], u, float(p_L_C_R_frac[u][0]) / p_L_C_R_frac[u][1])
-        # --------------------------------------------------------------------------------
+        # ---------------------------------------------------------------
 
     if 'DBN' in USED_MODELS:
         print 'Will going to run no more than: %.1f hours (approx)' % ((len(allCombinations) + len(interestingValues)) * MAX_ITERATIONS / 60 * len(sessions) / 1E6)
@@ -596,7 +596,7 @@ if __name__ == '__main__':
         testSessions = sessions
     del readInput       # needed to minimize memory consumption (see gc.collect() below)
 
-    print len(sessions), len(testSessions)
+    print '%d train sessions, %d test sessions' % (len(sessions), len(testSessions))
 
     if 'Baseline' in USED_MODELS:
         baselineModel = ClickModel()
