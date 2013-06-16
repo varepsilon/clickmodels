@@ -587,13 +587,6 @@ if __name__ == '__main__':
     if 'DBN' in USED_MODELS:
         print 'Will going to run no more than: %.1f hours (approx)' % ((len(allCombinations) + len(interestingValues)) * MAX_ITERATIONS / 60 * len(sessions) / 1E6)
 
-    #clickProbs = [0] * MAX_NUM
-    #for s in sessions:
-        #for i in xrange(MAX_NUM):
-            #clickProbs[i] += s.clicks[i]
-    #print '\t'.join(str(float(x) / len(sessions)) for x in clickProbs)
-    #sys.exit(0)
-
     if len(sys.argv) > 1:
         with open(sys.argv[1]) as test_clicks_file:
             testSessions = readInput(test_clicks_file)
