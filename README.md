@@ -130,4 +130,6 @@ You can also install and use [simplejson](http://pypi.python.org/pypi/simplejson
 If you set `TRAIN_FOR_METRIC = True` the code will expect you to provide document relevances instead of urls. A model will then be trained to assign the same attractiveness / satisfaction probabilities to all the documents with the same relevance. More details to follow.
 
 # Copyright and License
-Copyright © [Yandex](http://company.yandex.com). Published under the BSD license.
+Copyright © [Yandex](http://company.yandex.com) 2012-2013, [varepsilon](https://varepsilon.github.io) 2012-∞
+
+Published under the BSD license.
