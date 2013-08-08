@@ -43,7 +43,7 @@ this file
  
 ## makeGluedSERP.py 
 **{not used by other scripts}**
-Create html of the SERP containing fresh block item. This is use to illustrate the notion of *presentation types* used by Intent-Aware models. Run as: `./makeGluedSERP.py < data/serp_sample.json`. Output is placed in `html` subdirectory. **WARNING:** all previously generated html files in this directory will be removed
+Create html of the SERP containing fresh block item. This is used just to illustrate the notion of *presentation types* used by Intent-Aware models. Run as: `./makeGluedSERP.py < data/serp_sample.json`. Output is placed in `html` subdirectory. **WARNING:** all previously generated html files in this directory will be removed
 
 ## data/
 `data/` directory contains an example of click log (see format description above) as well as two examples of result pages with fresh block included (see `makeGluedSERP.py` description above): `data/serp_sample.json` is used in an example above, while `data/serp_sample2.json` was used to create a picture in the paper [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)
@@ -79,8 +79,10 @@ This is the file where you should setup your code. The default settings for para
 - `PRETTY_LOG` — make log output prettier. If `False` then more information is put into log.
 - `USED_MODELS` — list of model names to be tested in `__main__` section of the script. Possible names are `['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']`. Please refer to the `__main__` section of `inference.py` to see how these names are expressed in terms of our class hierarchy (all those nasty `if 'XXX' in USED_MODELS`).
 - `MIN_DOCS_PER_QUERY`, `MAX_DOCS_PER_QUERY` – number of documents per query. Set to 10 by default as most of search engines return list of 10 doucments.
-- `SERP_SIZE` - size of the search engine result page (SERP). Used if we want to model clicks beyond the first result page. See the section below for more details.
-- `EXTENDED_LOG_FORMAT` - if set to `True` the urls, layout and clicks are dicts instead of lists (see **Format of the Click Log** section above). Example: `data/click_log_sample_extended_format.tsv`.
+- `SERP_SIZE` - size of the search engine result page (SERP). Used if we want to model clicks beyond the first result page. See the section named **Beyond the First Result Page** below for more details.
+- `EXTENDED_LOG_FORMAT` - if set to `True` the urls, layout and clicks are dicts instead of lists (see **Format of the Click Log** section above). Example: `data/click_log_sample_extended_format.tsv`. 
+- `TRANSFORM_LOG` - transform the click log by inserting the fake documents for pagination button (currently works only with `EXTENDED_LOG_FORMAT = True`). See the section named **Beyond the First Result Page** below.
+- `QUERY_INDEPENDENT_PAGER` - used to switch between `SDBN(P)` / `SDBN(P-Q)`. Only used with `TRANSFORM_LOG = True`. 
 - `TRAIN_FOR_METRIC` – if `True` the model will be trained such that its parameters can be used in a metric (like [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)). See the section below for more details.
 - `PRINT_EBU_STATS` — if `True` the parameters of the EBU metric will be printed first (*Yilmaz, E. et al. 2010. Expected browsing utility for web search evaluation. CIKM. (2010)*).
 
@@ -150,9 +152,19 @@ For each model corresponding parametres will be printed out:
 - `UBM` — attractiveness probabilities `alpha` and position discount parameters `gamma`
 - `DCM` — attractiveness probabilities `alpha` (named as `urlRelevances` in the code) and position discount parameters `gamma`
 
-## More Details (Metrics)
-For more conceptual details about converting click models into evaluation metrics please refer to [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)
 
+For more conceptual details about converting click models into evaluation metrics please refer to the paper [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)
+
+***
+
+# Beyond the First Result Page
+If you want to model the clicks beyond the first result page you may want to model pagination button separately. We implemented the models described in the paper *A. Chuklin, P. Serdyukov, and M. de Rijke. Modeling Clicks Beyond the First Result Page. In CIKM. ACM, 2013.*. Namely, by setting the following config options you will get:
+
+- `TRANSFORM_LOG = True`, `QUERY_INDEPENDENT_PAGER = False`: `SDBN(P)` model
+- `TRANSFORM_LOG = True`, `QUERY_INDEPENDENT_PAGER = True`: `SDBN(P-Q)` model
+- `TRANSFORM_LOG = False`: reqular `SDBN` model
+
+Please, refer to the paper for more details.
 ***
 
 # References

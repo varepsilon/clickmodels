@@ -691,6 +691,7 @@ if __name__ == '__main__':
     del readInput       # needed to minimize memory consumption (see gc.collect() below)
 
     if TRANSFORM_LOG:
+        assert EXTENDED_LOG_FORMAT
         sessions, testSessions = ([x for x in (InputReader.mergeExtraToSessionItem(s) for s in ss) if x] for ss in [sessions, testSessions])
     else:
         sessions, testSessions = ([s for s in ss if InputReader.mergeExtraToSessionItem(s)] for ss in [sessions, testSessions])
