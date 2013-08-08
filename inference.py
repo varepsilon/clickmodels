@@ -711,9 +711,8 @@ if __name__ == '__main__':
     if 'SDBN' in USED_MODELS:
         sdbnModel = SimplifiedDbnModel()
         sdbnModel.train(sessions)
-        del sessions
-        gc.collect
-        print sdbnModel.urlRelevances[False][0]['PAGER']
+        if EXTENDED_LOG_FORMAT:
+            print '(a_p, s_p) = ', sdbnModel.urlRelevances[False][0]['PAGER']
         print 'SDBN:', sdbnModel.test(testSessions)
         del sdbnModel        # needed to minimize memory consumption (see gc.collect() below)
 
