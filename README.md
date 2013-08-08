@@ -148,8 +148,15 @@ For each model corresponding parametres will be printed out:
 - `UBM` — attractiveness probabilities `alpha` and position discount parameters `gamma`
 - `DCM` — attractiveness probabilities `alpha` (named as `urlRelevances` in the code) and position discount parameters `gamma`
 
-## More Details
-For more conceptual details please refer to [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)
+## More Details (Metrics)
+For more conceptual details about converting click models into evaluation metrics please refer to [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)
+
+***
+
+# References
+ - *A. Chuklin, P. Serdyukov, and M. de Rijke. Using Intent Information to Model User Behavior in Diversified Search. In ECIR, 2013.* [[pdf]](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)
+ - *A. Chuklin, P. Serdyukov, and M. de Rijke. Click model-based information retrieval metrics. In SIGIR. ACM, 2013.* [[pdf]](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)
+ - *A. Chuklin, P. Serdyukov, and M. de Rijke. Modeling Clicks Beyond the First Result Page. In CIKM. ACM, 2013.*
 
 # Copyright and License
 Copyright © [Yandex](http://company.yandex.com) 2012-2013, [varepsilon](https://varepsilon.github.io) 2012-∞
