@@ -57,15 +57,11 @@
 <!-- ==================== CLASS DESCRIPTION ==================== -->
 <h1 class="epydoc">Class SessionItem</h1><p class="nomargin-top"><span class="codelink"><a href="inference-pysrc.html#SessionItem">source&nbsp;code</a></span></p>
 <center>
-<center>  <map id="class_hierarchy_for_sessionite" name="class_hierarchy_for_sessionite">
-<area shape="rect" id="node1" href="inference.SessionItem-class.html" title="SessionItem" alt="" coords="5,62,96,87"/>
-<area shape="rect" id="node2" href="javascript:void(0);" title="tuple" alt="" coords="26,6,75,31"/>
-</map>
-  <img src="class_hierarchy_for_sessionite.gif" alt='' usemap="#class_hierarchy_for_sessionite" ismap="ismap" class="graph-without-title" />
-</center>
+
 </center>
 <hr />
-<p>SessionItem(intentWeight, query, urls, layout, clicks)</p>
+<p>SessionItem(intentWeight, query, urls, layout, clicks, 
+  extraclicks)</p>
 
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
@@ -215,7 +211,7 @@
         <tr>
           <td><span class="summary-sig"><a name="_make"></a><span class="summary-sig-name">_make</span>(<span class="summary-sig-arg">cls</span>,
         <span class="summary-sig-arg">iterable</span>,
-        <span class="summary-sig-arg">new</span>=<span class="summary-sig-default">&lt;built-in method __new__ of type object at 0x100f55970&gt;</span>,
+        <span class="summary-sig-arg">new</span>=<span class="summary-sig-default">&lt;built-in method __new__ of type object at 0x10c665b40&gt;</span>,
         <span class="summary-sig-arg">len</span>=<span class="summary-sig-default">&lt;built-in function len&gt;</span>)</span><br />
       Make a new SessionItem object from a sequence or iterable</td>
           <td align="right" valign="top">
@@ -256,9 +252,10 @@
         <span class="summary-sig-arg">query</span>,
         <span class="summary-sig-arg">urls</span>,
         <span class="summary-sig-arg">layout</span>,
-        <span class="summary-sig-arg">clicks</span>)</span><br />
+        <span class="summary-sig-arg">clicks</span>,
+        <span class="summary-sig-arg">extraclicks</span>)</span><br />
       Create new instance of SessionItem(intentWeight, query, urls, layout,
-      clicks)</td>
+      clicks, extraclicks)</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="inference-pysrc.html#SessionItem.__new__">source&nbsp;code</a></span>
             
@@ -290,7 +287,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="_fields"></a><span class="summary-name">_fields</span> = <code title="('intentWeight', 'query', 'urls', 'layout', 'clicks')"><code class="variable-group">(</code><code class="variable-quote">'</code><code class="variable-string">intentWeight</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">query</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">urls</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">layout</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">clicks</code><code class="variable-quote">'</code><code class="variable-group">)</code></code>
+        <a href="inference.SessionItem-class.html#_fields" class="summary-name" onclick="show_private();">_fields</a> = <code title="('intentWeight', 'query', 'urls', 'layout', 'clicks', 'extraclicks')"><code class="variable-group">(</code><code class="variable-quote">'</code><code class="variable-string">intentWeight</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">query</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">urls</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">layout</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">clicks</code><code class="variable-quote">'</code><code class="variable-ellipsis">...</code></code>
     </td>
   </tr>
 </table>
@@ -317,6 +314,14 @@
     </td><td class="summary">
         <a href="inference.SessionItem-class.html#clicks" class="summary-name">clicks</a><br />
       Alias for field number 4
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="inference.SessionItem-class.html#extraclicks" class="summary-name">extraclicks</a><br />
+      Alias for field number 5
     </td>
   </tr>
 <tr>
@@ -411,7 +416,8 @@
         <span class="sig-arg">query</span>,
         <span class="sig-arg">urls</span>,
         <span class="sig-arg">layout</span>,
-        <span class="sig-arg">clicks</span>)</span>
+        <span class="sig-arg">clicks</span>,
+        <span class="sig-arg">extraclicks</span>)</span>
     <br /><em class="fname">Static Method</em>
   </h3>
   </td><td align="right" valign="top"
@@ -420,7 +426,7 @@
   </tr></table>
   
   <p>Create new instance of SessionItem(intentWeight, query, urls, layout, 
-  clicks)</p>
+  clicks, extraclicks)</p>
   <dl class="fields">
     <dt>Returns: a new object with type S, a subtype of T</dt>
     <dt>Overrides:
@@ -453,6 +459,43 @@
 </td></tr></table>
 </div>
 <br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== -->
+<a name="section-ClassVariableDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variable Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariableDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="_fields"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">_fields</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">(</code><code class="variable-quote">'</code><code class="variable-string">intentWeight</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">query</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">urls</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">layout</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">clicks</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">extraclicks</code><code class="variable-quote">'</code><code class="variable-group">)</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
 <!-- ==================== PROPERTY DETAILS ==================== -->
 <a name="section-PropertyDetails"></a>
 <table class="details" border="1" cellpadding="3"
@@ -481,7 +524,24 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x1016ccf10&gt;
+&lt;operator.itemgetter object at 0x10ccceb50&gt;
+</pre></td></tr></table>
+
+    </dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="extraclicks"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">extraclicks</h3>
+  <p>Alias for field number 5</p>
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><table><tr><td><pre class="variable">
+&lt;operator.itemgetter object at 0x10ccceb90&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -498,7 +558,7 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x1016cce10&gt;
+&lt;operator.itemgetter object at 0x10cccea50&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -515,7 +575,7 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x1016cced0&gt;
+&lt;operator.itemgetter object at 0x10ccceb10&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -532,7 +592,7 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x1016cce50&gt;
+&lt;operator.itemgetter object at 0x10cccea90&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -549,7 +609,7 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x1016cce90&gt;
+&lt;operator.itemgetter object at 0x10cccead0&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -583,7 +643,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Jan 31 11:22:50 2013
+    Generated by Epydoc 3.0.1 on Thu Aug  8 10:57:37 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

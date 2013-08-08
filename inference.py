@@ -38,10 +38,10 @@ class ClickModel:
 
     def test(self, sessions, reportPositionPerplexity=True):
         logLikelihood = 0.0
-        positionPerplexity = [0.0] * MAX_NUM
-        positionPerplexityClickSkip = [[0.0, 0.0] for i in xrange(MAX_NUM)]
-        counts = [0] * MAX_NUM
-        countsClickSkip = [[0, 0] for i in xrange(MAX_NUM)]
+        positionPerplexity = [0.0] * MAX_DOCS_PER_QUERY
+        positionPerplexityClickSkip = [[0.0, 0.0] for i in xrange(MAX_DOCS_PER_QUERY)]
+        counts = [0] * MAX_DOCS_PER_QUERY
+        countsClickSkip = [[0, 0] for i in xrange(MAX_DOCS_PER_QUERY)]
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         for s in sessions:
             iw = s.intentWeight
@@ -78,9 +78,9 @@ class ClickModel:
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
         N = len(sessions)
         if reportPositionPerplexity:
-            return logLikelihood / N / MAX_NUM, perplexity, positionPerplexity, positionPerplexityClickSkip
+            return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity, positionPerplexity, positionPerplexityClickSkip
         else:
-            return logLikelihood / N / MAX_NUM, perplexity
+            return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity
 
     def _getClickProbs(self, s, possibleIntents):
         """
@@ -178,10 +178,10 @@ class DbnModel(ClickModel):
 
     @staticmethod
     def testBackwardForward():
-        positionRelevances = {'a': [0.5] * MAX_NUM, 's': [0.5] * MAX_NUM}
+        positionRelevances = {'a': [0.5] * MAX_DOCS_PER_QUERY, 's': [0.5] * MAX_DOCS_PER_QUERY}
         gammas = [0.9] * 4
-        layout = [False] * (MAX_NUM + 1)
-        clicks = [0] * MAX_NUM
+        layout = [False] * (MAX_DOCS_PER_QUERY + 1)
+        clicks = [0] * MAX_DOCS_PER_QUERY
         alpha, beta = DbnModel.getForwardBackwardEstimates(positionRelevances, gammas, layout, clicks, False)
         x = alpha[0][0] * beta[0][0] + alpha[0][1] * beta[0][1]
         assert all(abs((a[0] * b[0] + a[1] * b[1]) / x  - 1) < 0.00001 for a, b in zip(alpha, beta))
@@ -333,9 +333,9 @@ class UbmModel(ClickModel):
         # alpha: intent -> query -> url -> "attractiveness probability"
         self.alpha = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
         # gamma: freshness of the current result: gammaType -> rank -> "distance from the last click" - 1 -> examination probability
-        self.gamma = [[[0.5 for d in xrange(MAX_NUM)] for r in xrange(MAX_NUM)] for g in xrange(self.gammaTypesNum)]
+        self.gamma = [[[0.5 for d in xrange(MAX_DOCS_PER_QUERY)] for r in xrange(MAX_DOCS_PER_QUERY)] for g in xrange(self.gammaTypesNum)]
         if self.explorationBias:
-            self.e = [0.5 for p in xrange(MAX_NUM)]
+            self.e = [0.5 for p in xrange(MAX_DOCS_PER_QUERY)]
         if not PRETTY_LOG:
             print >>sys.stderr, '-' * 80
             print >>sys.stderr, 'Start. Current time is', datetime.now()
@@ -343,9 +343,9 @@ class UbmModel(ClickModel):
             self.queryIntentsWeights = defaultdict(lambda: [])
             # not like in DBN! xxxFractions[0] is a numerator while xxxFraction[1] is a denominator
             alphaFractions = dict((i, [defaultdict(lambda: [1.0, 2.0]) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
-            gammaFractions = [[[[1.0, 2.0] for d in xrange(MAX_NUM)] for r in xrange(MAX_NUM)] for g in xrange(self.gammaTypesNum)]
+            gammaFractions = [[[[1.0, 2.0] for d in xrange(MAX_DOCS_PER_QUERY)] for r in xrange(MAX_DOCS_PER_QUERY)] for g in xrange(self.gammaTypesNum)]
             if self.explorationBias:
-                eFractions = [[1.0, 2.0] for p in xrange(MAX_NUM)]
+                eFractions = [[1.0, 2.0] for p in xrange(MAX_DOCS_PER_QUERY)]
             # E-step
             for s in sessions:
                 query = s.query
@@ -401,15 +401,15 @@ class UbmModel(ClickModel):
                         num_points += 1
                         self.alpha[i][q][url] = new_alpha
             for g in xrange(self.gammaTypesNum):
-                for r in xrange(MAX_NUM):
-                    for d in xrange(MAX_NUM):
+                for r in xrange(MAX_DOCS_PER_QUERY):
+                    for d in xrange(MAX_DOCS_PER_QUERY):
                         gF = gammaFractions[g][r][d]
                         new_gamma = gF[0] / gF[1]
                         sum_square_displacement += (self.gamma[g][r][d] - new_gamma) ** 2
                         num_points += 1
                         self.gamma[g][r][d] = new_gamma
             if self.explorationBias:
-                for p in xrange(MAX_NUM):
+                for p in xrange(MAX_DOCS_PER_QUERY):
                     new_e = eFractions[p][0] / eFractions[p][1]
                     sum_square_displacement += (self.e[p] - new_e) ** 2
                     num_points += 1
@@ -475,11 +475,11 @@ class DcmModel(ClickModel):
     def train(self, sessions):
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         urlRelFractions = dict((i, [defaultdict(lambda: [1.0, 1.0]) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
-        gammaFractions = [[[1.0, 1.0] for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_NUM)]
+        gammaFractions = [[[1.0, 1.0] for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_DOCS_PER_QUERY)]
         for s in sessions:
             query = s.query
             layout = [False] * len(s.layout) if self.ignoreLayout else s.layout
-            lastClickedPos = MAX_NUM - 1
+            lastClickedPos = MAX_DOCS_PER_QUERY - 1
             for k, c in enumerate(s.clicks):
                 if c != 0:
                     lastClickedPos = k
@@ -495,14 +495,14 @@ class DcmModel(ClickModel):
                     else:
                         urlRelFractions[i][query][u][0] += intentWeights[i]
         self.urlRelevances = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
-        self.gammas = [[0.5 for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_NUM)]
+        self.gammas = [[0.5 for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_DOCS_PER_QUERY)]
         for i in possibleIntents:
             for query, d in enumerate(urlRelFractions[i]):
                 if not d:
                     continue
                 for url, relFractions in d.iteritems():
                     self.urlRelevances[i][query][url] = relFractions[1] / (relFractions[1] + relFractions[0])
-        for k in xrange(MAX_NUM):
+        for k in xrange(MAX_DOCS_PER_QUERY):
             for g in xrange(self.gammaTypesNum):
                 self.gammas[k][g] = gammaFractions[k][g][0] / (gammaFractions[k][g][0] + gammaFractions[k][g][1])
 
@@ -554,11 +554,11 @@ class InputReader:
                 layout, _ = self.convertToList(layout, False, urlsObserved)
                 clicks, extra = self.convertToList(clicks, 0, urlsObserved)
             else:
-                urls = urls[:MAX_NUM]
+                urls = urls[:MAX_DOCS_PER_QUERY]
                 urlsObserved = len(urls)
                 layout = layout[:urlsObserved]
                 clicks = clicks[:urlsObserved]
-            if urlsObserved < MIN_NUM:
+            if urlsObserved < MIN_DOCS_PER_QUERY:
                 continue
             if self.discardNoClicks and not any(clicks):
                 continue
@@ -571,7 +571,7 @@ class InputReader:
                 self.query_to_id[(query, region)] = self.current_query_id
                 self.current_query_id += 1
             intentWeight = float(intentWeight)
-            # add fake G_{MAX_NUM+1} to simplify gamma calculation:
+            # add fake G_{MAX_DOCS_PER_QUERY+1} to simplify gamma calculation:
             layout.append(False)
             url_ids = []
             for u in urls:
@@ -603,8 +603,8 @@ class InputReader:
         return sessions
 
     @staticmethod
-    def convertToList(sparseDict, defaultElem=0, maxLen=(MAX_NUM - MAX_NUM // SERP_SIZE)):
-        """ Convert dict of the format {"1": 1, "13": 2} to the list of the length MAX_NUM """
+    def convertToList(sparseDict, defaultElem=0, maxLen=(MAX_DOCS_PER_QUERY - MAX_DOCS_PER_QUERY // SERP_SIZE)):
+        """ Convert dict of the format {"1": 1, "13": 2} to the list of the length MAX_DOCS_PER_QUERY """
         convertedList = [defaultElem] * maxLen
         extra = {}
         for k, v in sparseDict.iteritems():
@@ -639,7 +639,7 @@ class InputReader:
             if DEBUG:
                 assert len(newUrls) == len(newClicks)
                 assert len(newUrls) + 1 == len(newLayout), (len(newUrls), len(newLayout))
-                assert len(newUrls) < len(s.urls) + MAX_NUM / SERP_SIZE, (len(s.urls), len(newUrls))
+                assert len(newUrls) < len(s.urls) + MAX_DOCS_PER_QUERY / SERP_SIZE, (len(s.urls), len(newUrls))
             return SessionItem(s.intentWeight, s.query, newUrls, newLayout, newClicks, {'TRANSFORMED': True})
 
 
@@ -694,8 +694,8 @@ if __name__ == '__main__':
 
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
     print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if len(s.urls) > SERP_SIZE + 1])
-#    clickProbs = [0.0] * MAX_NUM
-    #counts = [0] * MAX_NUM
+#    clickProbs = [0.0] * MAX_DOCS_PER_QUERY
+    #counts = [0] * MAX_DOCS_PER_QUERY
     #for s in sessions:
         #for i, c in enumerate(s.clicks):
             #clickProbs[i] += 1 if c else 0
@@ -723,9 +723,9 @@ if __name__ == '__main__':
             print '\n'.join(['%s\t%f' % r for r in \
                     [(x, ubmModel.alpha[False][0][x]) for x in \
                             ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']]])
-            for d in xrange(MAX_NUM):
-                for r in xrange(MAX_NUM):
-                    print ('%.4f ' % (ubmModel.gamma[0][r][MAX_NUM - 1 - d] if r + d >= MAX_NUM - 1 else 0)),
+            for d in xrange(MAX_DOCS_PER_QUERY):
+                for r in xrange(MAX_DOCS_PER_QUERY):
+                    print ('%.4f ' % (ubmModel.gamma[0][r][MAX_DOCS_PER_QUERY - 1 - d] if r + d >= MAX_DOCS_PER_QUERY - 1 else 0)),
                 print
         print 'UBM', ubmModel.test(testSessions)
         del ubmModel       # needed to minimize memory consumption (see gc.collect() below)

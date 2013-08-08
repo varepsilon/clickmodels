@@ -78,14 +78,14 @@ This is the file where you should setup your code. The default settings for para
 - `DEBUG` — perform some additional tests when running algorithm (makes it slower)
 - `PRETTY_LOG` — make log output prettier. If `False` then more information is put into log.
 - `USED_MODELS` — list of model names to be tested in `__main__` section of the script. Possible names are `['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']`. Please refer to the `__main__` section of `inference.py` to see how these names are expressed in terms of our class hierarchy (all those nasty `if 'XXX' in USED_MODELS:…`).
-- `MAX_NUM` – number of documents per query. Set to 10 by default as most of search engines return list of 10 doucments.
+- `MIN_DOCS_PER_QUERY`, `MAX_DOCS_PER_QUERY` – number of documents per query. Set to 10 by default as most of search engines return list of 10 doucments.
 - `TRAIN_FOR_METRIC` – if `True` the model will be trained such that its parameters can be used in a metric (like [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)). See below for more details.
 - `PRINT_EBU_STATS` — if `True` the parameters of the EBU metric will be printed first (*Yilmaz, E. et al. 2010. Expected browsing utility for web search evaluation. CIKM. (2010)*)
 
 ***
 
 # Class Hierarchy
-Also see epydoc-generated [documentation](http://htmlpreview.github.com/?https://github.com/varepsilon/clickmodels/blob/master/doc/html/index.html).
+Also see epydoc-generated [documentation](http://htmlpreview.github.io/?https://raw.github.com/varepsilon/clickmodels/master/doc/html/inference-module.html).
 ## Click Models
 ![Inheritance Diagram](https://raw.github.com/varepsilon/clickmodels/master/doc/html/class_hierarchy_for_clickmodel.gif)
 
