@@ -297,7 +297,7 @@ class SimplifiedDbnModel(DbnModel):
             for k, (u, c) in enumerate(zip(s.urls, s.clicks[:(lastClickedPos + 1)])):
                 tmpQuery = query
                 if QUERY_INDEPENDENT_PAGER and u == 'PAGER':
-                    assert TRANSFORMED_LOG
+                    assert TRANSFORM_LOG
                     # the same dummy query for all pagers
                     query = 0
 
@@ -687,7 +687,7 @@ if __name__ == '__main__':
         testSessions = sessions
     del readInput       # needed to minimize memory consumption (see gc.collect() below)
 
-    if TRANSFORMED_LOG:
+    if TRANSFORM_LOG:
         sessions, testSessions = ([x for x in (InputReader.mergeExtraToSessionItem(s) for s in ss) if x] for ss in [sessions, testSessions])
     else:
         sessions, testSessions = ([s for s in ss if InputReader.mergeExtraToSessionItem(s)] for ss in [sessions, testSessions])
@@ -711,7 +711,7 @@ if __name__ == '__main__':
     if 'SDBN' in USED_MODELS:
         sdbnModel = SimplifiedDbnModel()
         sdbnModel.train(sessions)
-        if EXTENDED_LOG_FORMAT:
+        if TRANSFORM_LOG:
             print '(a_p, s_p) = ', sdbnModel.urlRelevances[False][0]['PAGER']
         print 'SDBN:', sdbnModel.test(testSessions)
         del sdbnModel        # needed to minimize memory consumption (see gc.collect() below)
