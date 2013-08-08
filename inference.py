@@ -545,7 +545,10 @@ class InputReader:
             extra = {}
             urlsObserved = 0
             if EXTENDED_LOG_FORMAT:
-                urls, _ = self.convertToList(urls, '')
+                maxLen = MAX_DOCS_PER_QUERY
+                if TRANSFORM_LOG:
+                    maxLen -= MAX_DOCS_PER_QUERY // SERP_SIZE
+                urls, _ = self.convertToList(urls, '', maxLen)
                 for u in urls:
                     if u == '':
                         break
@@ -603,8 +606,8 @@ class InputReader:
         return sessions
 
     @staticmethod
-    def convertToList(sparseDict, defaultElem=0, maxLen=(MAX_DOCS_PER_QUERY - MAX_DOCS_PER_QUERY // SERP_SIZE)):
-        """ Convert dict of the format {"1": 1, "13": 2} to the list of the length MAX_DOCS_PER_QUERY """
+    def convertToList(sparseDict, defaultElem=0, maxLen=MAX_DOCS_PER_QUERY):
+        """ Convert dict of the format {"0": doc0, "13": doc13} to the list of the length MAX_DOCS_PER_QUERY """
         convertedList = [defaultElem] * maxLen
         extra = {}
         for k, v in sparseDict.iteritems():

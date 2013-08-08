@@ -74,13 +74,15 @@ This file contains implementation of all the click models, probabilistic inferen
 **{used by `inference.py`}**
 This is the file where you should setup your code. The default settings for parameters are set in `config_sample.py`.
 
-- `MAX_ITERATIONS` — maximum number of iterations in Expectation Maximization (EM) algorithm (applicable only for models using EM algorithm)
+- `MAX_ITERATIONS` — maximum number of iterations in Expectation Maximization (EM) algorithm (applicable only for models using EM algorithm).
 - `DEBUG` — perform some additional tests when running algorithm (makes it slower)
 - `PRETTY_LOG` — make log output prettier. If `False` then more information is put into log.
-- `USED_MODELS` — list of model names to be tested in `__main__` section of the script. Possible names are `['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']`. Please refer to the `__main__` section of `inference.py` to see how these names are expressed in terms of our class hierarchy (all those nasty `if 'XXX' in USED_MODELS:…`).
+- `USED_MODELS` — list of model names to be tested in `__main__` section of the script. Possible names are `['Baseline', 'SDBN', 'UBM', 'UBM-IA', 'EB_UBM', 'EB_UBM-IA', 'DCM', 'DCM-IA', 'DBN', 'DBN-IA']`. Please refer to the `__main__` section of `inference.py` to see how these names are expressed in terms of our class hierarchy (all those nasty `if 'XXX' in USED_MODELS`).
 - `MIN_DOCS_PER_QUERY`, `MAX_DOCS_PER_QUERY` – number of documents per query. Set to 10 by default as most of search engines return list of 10 doucments.
-- `TRAIN_FOR_METRIC` – if `True` the model will be trained such that its parameters can be used in a metric (like [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)). See below for more details.
-- `PRINT_EBU_STATS` — if `True` the parameters of the EBU metric will be printed first (*Yilmaz, E. et al. 2010. Expected browsing utility for web search evaluation. CIKM. (2010)*)
+- `SERP_SIZE` - size of the search engine result page (SERP). Used if we want to model clicks beyond the first result page. See the section below for more details.
+- `EXTENDED_LOG_FORMAT` - if set to `True` the urls, layout and clicks are dicts instead of lists (see **Format of the Click Log** section above). Example: `data/click_log_sample_extended_format.tsv`.
+- `TRAIN_FOR_METRIC` – if `True` the model will be trained such that its parameters can be used in a metric (like [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)). See the section below for more details.
+- `PRINT_EBU_STATS` — if `True` the parameters of the EBU metric will be printed first (*Yilmaz, E. et al. 2010. Expected browsing utility for web search evaluation. CIKM. (2010)*).
 
 ***
 
