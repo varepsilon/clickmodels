@@ -158,7 +158,7 @@ For more conceptual details about converting click models into evaluation metric
 ***
 
 # Beyond the First Result Page
-If you want to model the clicks beyond the first result page you may want to model pagination button separately. We implemented the models described in the paper *A. Chuklin, P. Serdyukov, and M. de Rijke. Modeling Clicks Beyond the First Result Page. In CIKM. ACM, 2013.*. Namely, by setting the following config options you will get:
+If you want to model the clicks beyond the first result page you may want to model pagination button separately. We implemented the models described in the paper [A. Chuklin, P. Serdyukov, and M. de Rijke. Modeling Clicks Beyond the First Result Page. In CIKM. ACM, 2013.](http://ilps.science.uva.nl/sites/ilps.science.uva.nl/files/cikm1325-chuklin.pdf). Namely, by setting the following config options you will get:
 
 - `TRANSFORM_LOG = True`, `QUERY_INDEPENDENT_PAGER = False`: `SDBN(P)` model
 - `TRANSFORM_LOG = True`, `QUERY_INDEPENDENT_PAGER = True`: `SDBN(P-Q)` model
@@ -170,7 +170,7 @@ Please, refer to the paper for more details.
 # References
  - *A. Chuklin, P. Serdyukov, and M. de Rijke. Using Intent Information to Model User Behavior in Diversified Search. In ECIR, 2013.* [[pdf]](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)
  - *A. Chuklin, P. Serdyukov, and M. de Rijke. Click model-based information retrieval metrics. In SIGIR. ACM, 2013.* [[pdf]](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)
- - *A. Chuklin, P. Serdyukov, and M. de Rijke. Modeling Clicks Beyond the First Result Page. In CIKM. ACM, 2013.*
+ - *A. Chuklin, P. Serdyukov, and M. de Rijke. Modeling Clicks Beyond the First Result Page. In CIKM. ACM, 2013.* [[pdf]](http://ilps.science.uva.nl/sites/ilps.science.uva.nl/files/cikm1325-chuklin.pdf)
 
 # Copyright and License
 Copyright © [Yandex](http://company.yandex.com) 2012-2013, [varepsilon](https://varepsilon.github.io) 2012-∞
