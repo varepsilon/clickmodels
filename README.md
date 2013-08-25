@@ -3,9 +3,10 @@
 ClickModels is a small set of Python scripts for the user click models initially developed at [Yandex](http://company.yandex.com). A *Click Model* is a probabilistic graphical model used to predict search engine click data from past observations.
 This project is aimed to deal with click models used in Information Retrieval (see next section) and intended to be easy-to-read and easy-to-modify. If it's not, please let me know how to improve it :)
 
-If you are using this code for your research work, consider citing [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search) or [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics) if appropriate.
+If you are using this code for your research work, consider citing one of our papers when appropriate
+(see [References](https://github.com/varepsilon/clickmodels/#references) section below).
 
-If you are looking for a serious framework to work with probabilistic graphical models you might want to examine [Infer.NET](http://research.microsoft.com/en-us/um/cambridge/projects/infernet/). It should also work with IronPython.
+If you are looking for a general-purpose framework to work with probabilistic graphical models you might want to examine [Infer.NET](http://research.microsoft.com/en-us/um/cambridge/projects/infernet/). It should also work with IronPython.
 
 ***
 
@@ -15,6 +16,7 @@ If you are looking for a serious framework to work with probabilistic graphical 
 - *Exploration Bias User Browsing Model* ( **EB_UBM** ): Chen, D. et al. 2012. Beyond ten blue links: enabling user click modeling in federated web search. WSDM (2012).
 - *Dependent Click Model* ( **DCM** ): Guo, F. et al. 2009. Efficient multiple-click models in web search. WSDM (2009).
 - *Intent-Aware Models* ( **DBN-IA, UBM-IA, EB_UBM-IA, DCM-IA** ): [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)
+
 ***
 
 # Format of the Click Log
