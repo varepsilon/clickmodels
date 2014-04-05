@@ -12,10 +12,7 @@ import numpy as np
 import random
 
 
-def mean(X):
-    return sum(X) / float(len(X))
-
-def bootstrap(sample, samplesize=None, nsamples=1000, statfunc=mean, conf=0.95):
+def bootstrap(sample, samplesize=None, nsamples=1000, statfunc=np.mean, conf=0.95):
     """
     Arguments:
        sample - input sample of values
@@ -33,7 +30,7 @@ def bootstrap(sample, samplesize=None, nsamples=1000, statfunc=mean, conf=0.95):
         resample = [random.choice(sample) for i in range(n)]
         x = statfunc(resample)
         X.append(x)
-    bias = mean(X) - statfunc(sample)
+    bias = np.mean(X) - statfunc(sample)
 
     plower  = (1 - conf) / 2.0
     pupper  = 1 - plower
