@@ -90,12 +90,12 @@ class ClickModel(object):
         positionPerplexity = [2 ** (-x / count if count else x) for (x, count) in zip(positionPerplexity, counts)]
         positionPerplexityClickSkip = [[2 ** (-x[click] / (count[click] if count[click] else 1) if count else x) \
                                         for (x, count) in zip(positionPerplexityClickSkip, countsClickSkip)] for click in xrange(2)]
-                                        perplexity = sum(positionPerplexity) / len(positionPerplexity)
-                                        N = len(sessions)
-                                        if reportPositionPerplexity:
-                                            return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity, positionPerplexity, positionPerplexityClickSkip
-                                        else:
-                                            return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity
+        perplexity = sum(positionPerplexity) / len(positionPerplexity)
+        N = len(sessions)
+        if reportPositionPerplexity:
+            return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity, positionPerplexity, positionPerplexityClickSkip
+        else:
+            return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity
     
     
     def _getClickProbs(self, s, possibleIntents):
@@ -865,10 +865,10 @@ if __name__ == '__main__':
             print '\n'.join(['%s\t%f' % r for r in \
                              [(x, ubmModel.alpha[False][0][x]) for x in \
                               ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']]])
-                              for d in xrange(MAX_DOCS_PER_QUERY):
-                                  for r in xrange(MAX_DOCS_PER_QUERY):
-                                      print ('%.4f ' % (ubmModel.gamma[0][r][MAX_DOCS_PER_QUERY - 1 - d] if r + d >= MAX_DOCS_PER_QUERY - 1 else 0)),
-                                  print
+        for d in xrange(MAX_DOCS_PER_QUERY):
+            for r in xrange(MAX_DOCS_PER_QUERY):
+                print ('%.4f ' % (ubmModel.gamma[0][r][MAX_DOCS_PER_QUERY - 1 - d] if r + d >= MAX_DOCS_PER_QUERY - 1 else 0)),
+            print
         print 'UBM', ubmModel.test(testSessions)
         del ubmModel       # needed to minimize memory consumption (see gc.collect() below)
     
