@@ -348,6 +348,10 @@ class DbnModel(ClickModel):
             sessionEstimate['clicks'][k] = sum(alpha[k + 1])
         
         return sessionEstimate
+
+
+    def get_abandonment_prob(self,rank):
+        return self.gammas[0]
     
     def _getClickProbs(self, s, possibleIntents):
         """
@@ -864,7 +868,7 @@ if __name__ == '__main__':
         if TRAIN_FOR_METRIC:
             print '\n'.join(['%s\t%f' % r for r in \
                              [(x, ubmModel.alpha[False][0][x]) for x in \
-                              ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']]])
+                              ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VI  TAL']]])
         for d in xrange(MAX_DOCS_PER_QUERY):
             for r in xrange(MAX_DOCS_PER_QUERY):
                 print ('%.4f ' % (ubmModel.gamma[0][r][MAX_DOCS_PER_QUERY - 1 - d] if r + d >= MAX_DOCS_PER_QUERY - 1 else 0)),
