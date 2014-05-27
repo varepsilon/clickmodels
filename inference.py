@@ -31,27 +31,25 @@ SessionItem = namedtuple('SessionItem', ['intentWeight', 'query', 'results', 'la
 class ClickModel(object):
     """
         An abstract click model interface.
-        """
-    
-    
+    """
+
     def __init__(self, ignoreIntents=True, ignoreLayout=True):
         self.ignoreIntents = ignoreIntents
         self.ignoreLayout = ignoreLayout
-    
+
     @abstractmethod
     def train(self, sessions):
         """
             Trains the model.
-            """
+        """
         pass
-    
+
     @abstractmethod
     def test(self, sessions, reportPositionPerplexity=True):
         """
             Evaluates the prediciton power of the click model for a given sessions.
             Returns the log-likelihood, perplexity and position perplexity.
-            """
-        
+        """
         logLikelihood = 0.0
         positionPerplexity = [0.0] * MAX_DOCS_PER_QUERY
         positionPerplexityClickSkip = [[0.0, 0.0] for i in xrange(MAX_DOCS_PER_QUERY)]
@@ -89,110 +87,97 @@ class ClickModel(object):
                 correctedRank += 1
         positionPerplexity = [2 ** (-x / count if count else x) for (x, count) in zip(positionPerplexity, counts)]
         positionPerplexityClickSkip = [[2 ** (-x[click] / (count[click] if count[click] else 1) if count else x) \
-                                        for (x, count) in zip(positionPerplexityClickSkip, countsClickSkip)] for click in xrange(2)]
+                for (x, count) in zip(positionPerplexityClickSkip, countsClickSkip)] for click in xrange(2)]
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
         N = len(sessions)
         if reportPositionPerplexity:
             return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity, positionPerplexity, positionPerplexityClickSkip
         else:
             return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity
-    
-    
+
     def _getClickProbs(self, s, possibleIntents):
         """
-            Returns clickProbs list
+            Returns clickProbs list given the lis of s.clicks,
             clickProbs[i][k] = P(C_1, ..., C_k | I=i)
-            """
+        """
         return dict((i, [0.5 ** (k + 1) for k in xrange(len(s.clicks))]) for i in possibleIntents)
-    
-    
+
     def get_loglikelihood(self, sessions):
         """
             Returns the log-likelihood of the current model for given sessions.
-            """
+        """
         loglikelihood = 0
-        
         for session in sessions:
             log_click_probs = self.get_log_click_probs(session)
             loglikelihood += sum(log_click_probs) / len(log_click_probs)
-        
-        loglikelihood /= len(sessions)
+        loglikelihood /= (len(sessions) if len(sessions) > 0 else 1.0)
         return loglikelihood
-    
+
     def get_log_click_probs(self, session):
         """
             Returns the list of log-click probabilities for all URLs in a given session.
-            """
-        
+            It assumes that there is only one intent.
+        """
         return _getClickProbs(self, session, [1])
-        pass
-    
+
     @abstractmethod
     def get_model_relevances(self, session):
         """
             Returns estimated relevance of each document in a given session
             based on a trained click model.
-            """
+        """
         pass
-    
+
     @abstractmethod
     def predict_click_probs(self, session):
         """
             Predicts click probabilities for a given session. Does not use clicks.
-            """
+        """
         pass
-    
+
     @abstractmethod
     def predict_stop_probs(self, session):
         """
             Predicts stop probabilities for each document in a session.
-            """
+        """
         pass
-    
-    
+
     @abstractmethod
     def get_abandonment_prob(self,rank):
         return 0
-    
+
     def generate_clicks(self, session):
         """
             Generates clicks for a given session.
-            """
+        """
         clicks = zeros(len(session.results), dtype='int')
         predicted_click_probs = self.predict_click_probs(session)
         predicted_stop_probs = self.predict_stop_probs(session)
-        
         for rank, result in enumerate(session.results):
-            random_click_prob = random.uniform(0,1)
+            random_click_prob = random.uniform(0, 1)
             clicks[rank] = 1 if random_click_prob < predicted_click_probs[rank] else 0
-            
             if clicks[rank] == 1:
-                random_stop_prob = random.uniform(0,1)
+                random_stop_prob = random.uniform(0, 1)
                 if random_stop_prob < predicted_stop_probs[rank]:
                     break
             else:
-                random_stop_prob = random.uniform(0,1)
+                random_stop_prob = random.uniform(0, 1)
                 if random_stop_prob < self.get_abandonment_prob(rank):
                     break
-        
         return clicks
 
 
-
-
 class DbnModel(ClickModel):
-    
     def __init__(self, gammas, ignoreIntents=True, ignoreLayout=True):
         self.gammas = gammas
         ClickModel.__init__(self, ignoreIntents, ignoreLayout)
-    
+
     def train(self, sessions):
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         # intent -> query -> url -> (a_u, s_u)
         self.urlRelevances = dict((i, [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
         # here we store distribution of posterior intent weights given train data
         self.queryIntentsWeights = defaultdict(lambda: [])
-        
         # EM algorithm
         if not PRETTY_LOG:
             print >>sys.stderr, '-' * 80
@@ -212,7 +197,6 @@ class DbnModel(ClickModel):
                         positionRelevances[intent][r] = [self.urlRelevances[intent][query][url][r] for url in s.results]
                 layout = [False] * len(s.layout) if self.ignoreLayout else s.layout
                 sessionEstimate = dict((intent, self._getSessionEstimate(positionRelevances[intent], layout, s.clicks, intent)) for intent in possibleIntents)
-                
                 # P(I | C, G)
                 if self.ignoreIntents:
                     p_I__C_G = {False: 1, True: 0}
@@ -232,7 +216,6 @@ class DbnModel(ClickModel):
                             urlRelFractions[intent][query][url]['s'][0] += (1 - sessionEstimate[intent]['s'][k]) * p_I__C_G[intent]
             if not PRETTY_LOG:
                 sys.stderr.write('E')
-            
             # M step
             # update parameters and record mean square error
             sum_square_displacement = 0.0
@@ -265,7 +248,7 @@ class DbnModel(ClickModel):
             sys.stderr.write('\n')
         for q, intentWeights in self.queryIntentsWeights.iteritems():
             self.queryIntentsWeights[q] = sum(intentWeights) / len(intentWeights)
-    
+
     @staticmethod
     def testBackwardForward():
         positionRelevances = {'a': [0.5] * MAX_DOCS_PER_QUERY, 's': [0.5] * MAX_DOCS_PER_QUERY}
@@ -275,12 +258,12 @@ class DbnModel(ClickModel):
         alpha, beta = DbnModel.getForwardBackwardEstimates(positionRelevances, gammas, layout, clicks, False)
         x = alpha[0][0] * beta[0][0] + alpha[0][1] * beta[0][1]
         assert all(abs((a[0] * b[0] + a[1] * b[1]) / x  - 1) < 0.00001 for a, b in zip(alpha, beta))
-    
+
     @staticmethod
     def getGamma(gammas, k, layout, intent):
         index = 2 * (1 if layout[k + 1] else 0) + (1 if intent else 0)
         return gammas[index]
-    
+
     @staticmethod
     def getForwardBackwardEstimates(positionRelevances, gammas, layout, clicks, intent):
         N = len(clicks)
@@ -290,7 +273,6 @@ class DbnModel(ClickModel):
         beta = [[0.0, 0.0] for i in xrange(N + 1)]
         alpha[0] = [0.0, 1.0]
         beta[N] = [1.0, 1.0]
-        
         # P(E_{k+1} = e, C_k | E_k = e', G, I)
         updateMatrix = [[[0.0 for e1 in [0, 1]] for e in [0, 1]] for i in xrange(N)]
         for k, C_k in enumerate(clicks):
@@ -307,14 +289,13 @@ class DbnModel(ClickModel):
                 updateMatrix[k][0][1] = (s_u + (1 - gamma) * (1 - s_u)) * a_u
                 updateMatrix[k][1][0] = 0
                 updateMatrix[k][1][1] = gamma * (1 - s_u) * a_u
-        
+
         for k in xrange(N):
             for e in [0, 1]:
                 alpha[k + 1][e] = sum(alpha[k][e1] * updateMatrix[k][e][e1] for e1 in [0, 1])
                 beta[N - 1 - k][e] = sum(beta[N - k][e1] * updateMatrix[N - 1 - k][e1][e] for e1 in [0, 1])
-        
         return alpha, beta
-    
+
     def _getSessionEstimate(self, positionRelevances, layout, clicks, intent):
         # Returns {'a': P(A_k | I, C, G), 's': P(S_k | I, C, G), 'C': P(C | I, G), 'clicks': P(C_k | C_1, ..., C_{k-1}, I, G)} as a dict
         # sessionEstimate[True]['a'][k] = P(A_k = 1 | I = 'Fresh', C, G), probability of A_k = 0 can be calculated as 1 - p
@@ -322,7 +303,6 @@ class DbnModel(ClickModel):
         if DEBUG:
             assert N + 1 == len(layout)
         sessionEstimate = {'a': [0.0] * N, 's': [0.0] * N, 'e': [[0.0, 0.0] for k in xrange(N)], 'C': 0.0, 'clicks': [0.0] * N}
-        
         alpha, beta = self.getForwardBackwardEstimates(positionRelevances, self.gammas, layout, clicks, intent)
         try:
             varphi = [((a[0] * b[0]) / (a[0] * b[0] + a[1] * b[1]), (a[1] * b[1]) / (a[0] * b[0] + a[1] * b[1])) for a, b in zip(alpha, beta)]
@@ -346,9 +326,8 @@ class DbnModel(ClickModel):
                 sessionEstimate['s'][k] = varphi[k + 1][0] * s_u / (s_u + (1 - gamma) * (1 - s_u))
             # P(C_1, ..., C_k | I)
             sessionEstimate['clicks'][k] = sum(alpha[k + 1])
-        
         return sessionEstimate
-    
+
     def _getClickProbs(self, s, possibleIntents):
         """
             Returns clickProbs list:
@@ -367,63 +346,51 @@ class DbnModel(ClickModel):
                             positionRelevances[intent][r][k] = self.urlRelevances[intent][0][url][r]
         layout = [False] * len(s.layout) if self.ignoreLayout else s.layout
         return dict((i, self._getSessionEstimate(positionRelevances[i], layout, s.clicks, i)['clicks']) for i in possibleIntents)
-    
-    
+
     def get_model_relevances(self, session):
         """
             Returns estimated relevance of each document in a given session
             based on a trained click model.
-            """
-        
+        """
         relevances = []
-        
         for rank, result in enumerate(session.results):
             a = self.urlRelevances[0][session.query][result]['a']
             s = self.urlRelevances[0][session.query][result]['s']
             relevance = a * s
             relevances.append(relevance)
-        
-        
         return relevances
-    
+
     @abstractmethod
     def predict_click_probs(self, session):
         """
             Predicts click probabilities for a given session. Does not use clicks.
-            """
-        
+        """
         click_probs= []
-        
         for rank, result in enumerate(session.results):
             a = self.urlRelevances[0][session.query][result]['a']
             click_probs.append(a)
-        
         return click_probs
-    
+
     @abstractmethod
     def predict_stop_probs(self, session):
         """
             Predicts stop probabilities for each document in a session.
-            """
-        
+        """
         stop_probs= []
-        
         for rank, result in enumerate(session.results):
             a = self.urlRelevances[0][session.query][result]['a']
             s = self.urlRelevances[0][session.query][result]['s']
             stop_probs.append(a)
-        
         return stop_probs
 
 
 
 class SimplifiedDbnModel(DbnModel):
-    
     def __init__(self, ignoreIntents=True, ignoreLayout=True):
         assert ignoreIntents
         assert ignoreLayout
         DbnModel.__init__(self, (1.0, 1.0, 1.0, 1.0), ignoreIntents, ignoreLayout)
-    
+
     def train(self, sessions):
         urlRelFractions = [defaultdict(lambda: {'a': [1.0, 1.0], 's': [1.0, 1.0]}) for q in xrange(MAX_QUERY_ID)]
         for s in sessions:
@@ -438,7 +405,6 @@ class SimplifiedDbnModel(DbnModel):
                     assert TRANSFORM_LOG
                     # the same dummy query for all pagers
                     query = 0
-                
                 if c != 0:
                     urlRelFractions[query][u]['a'][1] += 1
                     if k == lastClickedPos:
@@ -459,13 +425,13 @@ class SimplifiedDbnModel(DbnModel):
 
 
 class UbmModel(ClickModel):
-    
+
     gammaTypesNum = 4
-    
+
     def __init__(self, ignoreIntents=True, ignoreLayout=True, explorationBias=False):
         self.explorationBias = explorationBias
         ClickModel.__init__(self, ignoreIntents, ignoreLayout)
-    
+
     def train(self, sessions):
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         # alpha: intent -> query -> url -> "attractiveness probability"
@@ -563,17 +529,17 @@ class UbmModel(ClickModel):
             sys.stderr.write('\n')
         for q, intentWeights in self.queryIntentsWeights.iteritems():
             self.queryIntentsWeights[q] = sum(intentWeights) / len(intentWeights)
-    
+
     def _getSessionProb(self, s):
         clickProbs = self._getClickProbs(s, [False, True])
         N = len(s.clicks)
         return clickProbs[False][N - 1] / clickProbs[True][N - 1]
-    
+
     @staticmethod
     def getGamma(gammas, k, prevClick, layout, intent):
         index = (2 if layout[k] else 0) + (1 if intent else 0)
         return gammas[index][k][k - prevClick - 1]
-    
+
     def _getClickProbs(self, s, possibleIntents):
         """
             Returns clickProbs list
@@ -607,9 +573,9 @@ class EbUbmModel(UbmModel):
 
 
 class DcmModel(ClickModel):
-    
+
     gammaTypesNum = 4
-    
+
     def train(self, sessions):
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         urlRelFractions = dict((i, [defaultdict(lambda: [1.0, 1.0]) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
@@ -643,7 +609,7 @@ class DcmModel(ClickModel):
         for k in xrange(MAX_DOCS_PER_QUERY):
             for g in xrange(self.gammaTypesNum):
                 self.gammas[k][g] = gammaFractions[k][g][0] / (gammaFractions[k][g][0] + gammaFractions[k][g][1])
-    
+
     def _getClickProbs(self, s, possibleIntents):
         clickProbs = {False: [], True: []}          # P(C_1, ..., C_k)
         query = s.query
@@ -659,9 +625,8 @@ class DcmModel(ClickModel):
                 else:
                     clickProbs[i].append(examinationProb * r)
                     examinationProb *= self.getGamma(self.gammas[k], k, layout, i) * r  # P(C_1, ..., C_k, E_{k+1} = 1) = P(E_{k+1} = 1 | C_k, E_k = 1) * P(C_k | E_k = 1) *  P(C_1, ..., C_{k - 1}, E_k = 1)
-        
         return clickProbs
-    
+
     @staticmethod
     def getGamma(gammas, k, layout, intent):
         return DbnModel.getGamma(gammas, k, layout, intent)
@@ -674,7 +639,7 @@ class InputReader:
         self.current_url_id = 1
         self.current_query_id = 0
         self.discardNoClicks = discardNoClicks
-    
+
     def __call__(self, f):
         sessions = []
         for line in f:
@@ -742,7 +707,7 @@ class InputReader:
         global MAX_QUERY_ID
         MAX_QUERY_ID = self.current_query_id + 1
         return sessions
-    
+
     @staticmethod
     def convertToList(sparseDict, defaultElem=0, maxLen=MAX_DOCS_PER_QUERY):
         """ Convert dict of the format {"0": doc0, "13": doc13} to the list of the length MAX_DOCS_PER_QUERY """
@@ -754,7 +719,7 @@ class InputReader:
             except (ValueError, IndexError):
                 extra[k] = v
         return convertedList, extra
-    
+
     @staticmethod
     def mergeExtraToSessionItem(s):
         """ Put pager click into the session item (presented as a fake URL) """
@@ -794,10 +759,10 @@ if __name__ == '__main__':
             for g3 in interestingValues:
                 for g4 in interestingValues:
                     allCombinations.append((g1, g2, g3, g4))
-    
+
     readInput = InputReader()
     sessions = readInput(sys.stdin)
-    
+
     if TRAIN_FOR_METRIC and PRINT_EBU_STATS:
         # ---------------------------------------------------------------
         #                           For EBU
@@ -816,40 +781,40 @@ if __name__ == '__main__':
                         p_L_C_R_frac[u][0] += 1
                     p_L_C_R_frac[u][1] += 1
                 p_C_R_frac[u][1] += 1
-        
+
         for u in ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']:
             print 'P(C|%s)\t%f\tP(L|C,%s)\t%f' % (u, float(p_C_R_frac[u][0]) / p_C_R_frac[u][1], u, float(p_L_C_R_frac[u][0]) / p_L_C_R_frac[u][1])
     # ---------------------------------------------------------------
-    
+
     if len(sys.argv) > 1:
         with open(sys.argv[1]) as test_clicks_file:
             testSessions = readInput(test_clicks_file)
     else:
         testSessions = sessions
     del readInput       # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if TRANSFORM_LOG:
         assert EXTENDED_LOG_FORMAT
         sessions, testSessions = ([x for x in (InputReader.mergeExtraToSessionItem(s) for s in ss) if x] for ss in [sessions, testSessions])
     else:
         sessions, testSessions = ([s for s in ss if InputReader.mergeExtraToSessionItem(s)] for ss in [sessions, testSessions])
-    
+
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
     print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if len(s.results) > SERP_SIZE + 1])
-    #    clickProbs = [0.0] * MAX_DOCS_PER_QUERY
+    #clickProbs = [0.0] * MAX_DOCS_PER_QUERY
     #counts = [0] * MAX_DOCS_PER_QUERY
     #for s in sessions:
-    #for i, c in enumerate(s.clicks):
-    #clickProbs[i] += 1 if c else 0
-    #counts[i] += 1
+        #for i, c in enumerate(s.clicks):
+            #clickProbs[i] += 1 if c else 0
+            #counts[i] += 1
     #print '\t'.join((str(x / cnt if cnt else x) for (x, cnt) in zip(clickProbs, counts)))
-    #    sys.exit(0)
-    
+    #sys.exit(0)
+
     if 'Baseline' in USED_MODELS:
         baselineModel = ClickModel()
         baselineModel.train(sessions)
         print 'Baseline:', baselineModel.test(testSessions)
-    
+
     if 'SDBN' in USED_MODELS:
         sdbnModel = SimplifiedDbnModel()
         sdbnModel.train(sessions)
@@ -857,7 +822,7 @@ if __name__ == '__main__':
             print '(a_p, s_p) = ', sdbnModel.urlRelevances[False][0]['PAGER']
         print 'SDBN:', sdbnModel.test(testSessions)
         del sdbnModel        # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if 'UBM' in USED_MODELS:
         ubmModel = UbmModel()
         ubmModel.train(sessions)
@@ -871,27 +836,27 @@ if __name__ == '__main__':
             print
         print 'UBM', ubmModel.test(testSessions)
         del ubmModel       # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if 'UBM-IA' in USED_MODELS:
         ubmModel = UbmModel(ignoreIntents=False, ignoreLayout=False)
         ubmModel.train(sessions)
         print 'UBM-IA', ubmModel.test(testSessions)
         del ubmModel       # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if 'EB_UBM' in USED_MODELS:
         ebUbmModel = EbUbmModel()
         ebUbmModel.train(sessions)
         # print 'Exploration bias:', ebUbmModel.e
         print 'EB_UBM', ebUbmModel.test(testSessions)
         del ebUbmModel       # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if 'EB_UBM-IA' in USED_MODELS:
         ebUbmModel = EbUbmModel(ignoreIntents=False, ignoreLayout=False)
         ebUbmModel.train(sessions)
         # print 'Exploration bias:', ebUbmModel.e
         print 'EB_UBM-IA', ebUbmModel.test(testSessions)
         del ebUbmModel       # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if 'DCM' in USED_MODELS:
         dcmModel = DcmModel()
         dcmModel.train(sessions)
@@ -902,14 +867,14 @@ if __name__ == '__main__':
             print 'DCM gammas:', dcmModel.gammas
         print 'DCM', dcmModel.test(testSessions)
         del dcmModel       # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if 'DCM-IA' in USED_MODELS:
         dcmModel = DcmModel(ignoreIntents=False, ignoreLayout=False)
         dcmModel.train(sessions)
         # print 'DCM gammas:', dcmModel.gammas
         print 'DCM-IA', dcmModel.test(testSessions)
         del dcmModel       # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if 'DBN' in USED_MODELS:
         dbnModel = DbnModel((0.9, 0.9, 0.9, 0.9))
         dbnModel.train(sessions)
@@ -918,7 +883,7 @@ if __name__ == '__main__':
             print "relevances", dbnModel.get_model_relevances(session)
             print "clicks", dbnModel.generate_clicks(session)
         del dbnModel       # needed to minimize memory consumption (see gc.collect() below)
-    
+
     if 'DBN-IA' in USED_MODELS:
         for gammas in allCombinations:
             gc.collect()
