@@ -8,6 +8,20 @@ If you are using this code for your research work, consider citing one of our pa
 
 If you are looking for a general-purpose framework to work with probabilistic graphical models you might want to examine [Infer.NET](http://research.microsoft.com/en-us/um/cambridge/projects/infernet/). It should also work with IronPython.
 
+# Quick Start
+
+ - `cp config_sample.py config.py`
+ - `vim config.py`
+ - `./inference.py < data/click_log_sample.tsv 2>inference.log`
+ 
+ More details about the config and input data formats below.
+ 
+
+# New!
+Now, thanks to [agrotov](https://github.com/agrotov), the models can also be run in a click generation mode and predict relevance (DBN only). Check out `ClickModel.get_model_relevances()` and `ClickModels.generate_clicks()` methods.
+
+**N.B.**: Use this code with care as it is not fully tested yet. 
+
 ***
 
 # Models Implemented
@@ -19,7 +33,7 @@ If you are looking for a general-purpose framework to work with probabilistic gr
 
 ***
 
-# Format of the Click Log
+# Format of the Input Data (Click Log)
 A small example can be found under `data/click_log_sample.tsv`. This is a tab-separated file, where each line has 7 elements. For example, the line `1dd100500	QUERY1	50	0.259109	["http://1", "http://2", "http://3","http://4","http://5","http://6","http://7","http://8","http://9","Http://10"]	[false, false, false, false, true, true, false, false, false, false]	[0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0]` has the following fields:
 
 1. `1dd100500` — some identifier (currently not used)
