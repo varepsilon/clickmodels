@@ -844,12 +844,12 @@ if __name__ == '__main__':
         ubmModel.train(sessions)
         if TRAIN_FOR_METRIC:
             print '\n'.join(['%s\t%f' % r for r in \
-                             [(x, ubmModel.alpha[False][0][x]) for x in \
-                              ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']]])
-        for d in xrange(MAX_DOCS_PER_QUERY):
-            for r in xrange(MAX_DOCS_PER_QUERY):
-                print ('%.4f ' % (ubmModel.gamma[0][r][MAX_DOCS_PER_QUERY - 1 - d] if r + d >= MAX_DOCS_PER_QUERY - 1 else 0)),
-            print
+                [(x, ubmModel.alpha[False][0][x]) for x in \
+                    ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']]])
+            for d in xrange(MAX_DOCS_PER_QUERY):
+                for r in xrange(MAX_DOCS_PER_QUERY):
+                    print ('%.4f ' % (ubmModel.gamma[0][r][MAX_DOCS_PER_QUERY - 1 - d] if r + d >= MAX_DOCS_PER_QUERY - 1 else 0)),
+                print
         print 'UBM', ubmModel.test(testSessions)
         del ubmModel       # needed to minimize memory consumption (see gc.collect() below)
 
@@ -878,8 +878,8 @@ if __name__ == '__main__':
         dcmModel.train(sessions)
         if TRAIN_FOR_METRIC:
             print '\n'.join(['%s\t%f' % r for r in \
-                             [(x, dcmModel.urlRelevances[False][0][x]) for x in \
-                              ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']]])
+                [(x, dcmModel.urlRelevances[False][0][x]) for x in \
+                    ['IRRELEVANT', 'RELEVANT', 'USEFUL', 'VITAL']]])
             print 'DCM gammas:', dcmModel.gammas
         print 'DCM', dcmModel.test(testSessions)
         del dcmModel       # needed to minimize memory consumption (see gc.collect() below)
