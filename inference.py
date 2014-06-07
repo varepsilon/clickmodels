@@ -64,7 +64,7 @@ class ClickModel(object):
             iw = s.intentWeight
             intentWeight = {False: 1.0} if self.ignoreIntents else {False: 1 - iw, True: iw}
             clickProbs = self._get_click_probs(s, possibleIntents)
-            N = len(s.clicks)
+            N = min(len(s.clicks), MAX_DOCS_PER_QUERY)
             if DEBUG:
                 assert N > 1
                 x = sum(clickProbs[i][N // 2] * intentWeight[i] for i in possibleIntents) / sum(clickProbs[i][N // 2 - 1] * intentWeight[i] for i in possibleIntents)
@@ -72,7 +72,8 @@ class ClickModel(object):
                 clickProbs2 = self._get_click_probs(s, possibleIntents)
                 y = sum(clickProbs2[i][N // 2] * intentWeight[i] for i in possibleIntents) / sum(clickProbs2[i][N // 2 - 1] * intentWeight[i] for i in possibleIntents)
                 assert abs(x + y - 1) < 0.01, (x, y)
-            logLikelihood += math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents))      # log_e
+            # Marginalize over possible intents: P(C_1, ..., C_N) = \sum_{i} P(C_1, ..., C_N | I=i) P(I=i)
+            logLikelihood += math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents)) / N
             correctedRank = 0    # we are going to skip clicks on fake pager urls
             for k, click in enumerate(s.clicks):
                 click = 1 if click else 0
@@ -93,11 +94,10 @@ class ClickModel(object):
         positionPerplexityClickSkip = [[2 ** (-x[click] / (count[click] if count[click] else 1) if count else x) \
                 for (x, count) in zip(positionPerplexityClickSkip, countsClickSkip)] for click in xrange(2)]
         perplexity = sum(positionPerplexity) / len(positionPerplexity)
-        N = len(sessions)
         if reportPositionPerplexity:
-            return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity, positionPerplexity, positionPerplexityClickSkip
+            return logLikelihood / len(sessions), perplexity, positionPerplexity, positionPerplexityClickSkip
         else:
-            return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity
+            return logLikelihood / len(sessions), perplexity
 
     def _get_click_probs(self, s, possibleIntents):
         """
