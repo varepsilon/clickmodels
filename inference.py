@@ -8,7 +8,6 @@ import gc
 import json
 import math
 from abc import ABCMeta, abstractmethod
-from numpy import zeros
 from collections import defaultdict, namedtuple
 from datetime import datetime
 import random
@@ -159,7 +158,7 @@ class ClickModel(object):
         """
             Generates clicks for a given session.
         """
-        clicks = zeros(len(session.results), dtype='int')
+        clicks = [0] * len(session.results)
         predicted_click_probs = self.predict_click_probs(session)
         predicted_stop_probs = self.predict_stop_probs(session)
         for rank, result in enumerate(session.results):
