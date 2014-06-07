@@ -7,6 +7,6 @@ setup(
     author='Aleksandr Chuklin',
     packages=['clickmodels'],
     license='LICENSE.txt',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     install_requires=[],
 )
