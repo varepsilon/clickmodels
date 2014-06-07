@@ -24,10 +24,11 @@ A small example can be found under `data/click_log_sample.tsv`. This is a tab-se
 
 1. `1dd100500` — some identifier (currently not used)
 2. `QUERY1` — text of the query. It can contain any UTF-8 characters except tab sign `\t`
-3. `50` — integer identifier of the region (country, city) of the user who submitted the query. At Yandex user region is heavily used by ranking, so throughout the code the pair `(query, region)` is used to identify query, i.e. the same query issued from the different regions considered as a different query. **If it is not what you want**, just put the some constant (e.g. `0`) in this column.
-4. `0.259109` — float value, corresponding to the probability `P(I = F)` that user had *special* intent F. In all the scripts we assume that user has one of the two intents: *special* intent F with probability `P(I = F)` and regular *web* intent with probability `1 - P(I = F)`. See [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013)](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search) for more details. **If you do not want all this intent stuff** just put `0` in this column.
-5. **json** list of the URLs of the documents that make up SERP (search engine result page). Document's url is an identifier, so in principle you can use any (string) id you want. **NB**: this is not python list, this is creepy json, so mind double quotes and no comma after the last element.
-6. **json** list with the *presentation types* of the documents (see [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)). **If you do not want to know this** just set it to the list of `false` of the same length as the previous list.
+3. `50` — integer identifier of the region (country, city) of the user who submitted the query. **If you don't want this, just put some constant (e.g., `0`) in this column**.
+At Yandex user region is heavily used by ranking, so throughout the code the pair `(query, region)` is used to identify the query, i.e., if we have the same query string from two different region we consider them as two separate queries.
+4. `0.259109` — float value, corresponding to the probability `P(I = V)` that user has a *vertical* intent V, i.e., he or she is interested more in the vertical documents than in organic web documents. **If you do not want any of this intent stuff just put `0` in this column**. We assume that the user has one of the two intents: *vertical* intent V with probability `P(I = V)` and regular *web* intent with probability `1 - P(I = V)`. For example, if we want to take into account user's interest in images and we somehow know the probability that the user is interested more in images than organic *web* results, we can make use of intent-aware click models. See [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013)](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search) for more details. 
+5. **json** list of the URLs of the documents that make up SERP (search engine result page). Document's url is an identifier, so in principle you can use any (string) id you want. **NB**: this is not a python list, so yuo have to use double quotes and no comma after the last element.
+6. **json** list with the *presentation types* (vertical types) of the documents (see [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)). **If you do not want to know this** just set it to the list of `false` of the same length as the previous list.
 7. **json** list of clicks. Each element is the number of times corresponding URL was clicked
 
 If you need more data to experiment with you can use any publicly available dataset and convert it to the format described above. For example, you can use a dataset provided by one of the Yandex challenges (you need to register to get access to the data):
@@ -50,9 +51,9 @@ Create html of the SERP containing fresh block item. This is used just to illust
 ## data/
 `data/` directory contains an example of click log (see format description above) as well as two examples of result pages with fresh block included (see `makeGluedSERP.py` description above): `data/serp_sample.json` is used in an example above, while `data/serp_sample2.json` was used to create a picture in the paper [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)
 
-## bootstrap.py, quantile.py
+## bootstrap.py
 **{used by `testSignificance.py`}**
-Copyright © [Ernesto P. Adorio](http://adorio-research.org/wordpress/?p=12295): files used to perform bootstrap test
+Copyright © [Ernesto P. Adorio](http://adorio-research.org/wordpress/?p=12295): code we use to perform a bootstrap test
 
 ## testSignificance.py
 **{not used by other scripts}**
@@ -66,15 +67,15 @@ Script used to compare different models and output significance of the differenc
 It first outputs the name of the "pair" `pairName` specified in the `TESTED_MODEL_PAIRS`, then pair of indeces `(i, j)` which mean that the model compared are `MODEL_CONSTRUCTORS[pairName][i]` and `MODEL_CONSTRUCTORS[pairName][j]` which is UBM and UBM-IA in our example. Next is the list of gains of model `j` over model `i` for each pair of the train/test logs (in our example we had 8 pairs of files under `directory_with_click_logs`). The next element is the confidence interval according to bootstrap test (with 95% confidence level and 1000 bootstrap samples). This line will be printed for all the "pairs" listed under `TESTED_MODEL_PAIRS` and for both Average Perplexity (PERPLEXITY) and Log Likelihood (LL). For perplexity measure also the gains for individual position (rank) are printed. Like this: `UBM POSITION PERPLEXITY GAINS: (0, 1) [[average_gain_for_pos1, confidence_interval_for_pos_1], …]`
 
 ## inference.py
-This file contains implementation of all the click models, probabilistic inference and helper functions needed to work with them. More details about the classes/functions below.
+This file contains implementation of all the click models, probabilistic inference and helper functions needed to work with them. This is the core of the codebase. More details about the classes/functions below.
 
 - **Usage**: `./inference.py < data/click_log_sample.tsv 2>inference.log`
 - **Input**: click log in the format described above (`sys.stdin`)
-- **Output** (assume that `TRAIN_FOR_METRIC = False`): `ModelName (LogLikelihood, Perplexity)`
+- **Output** (assuming that `TRAIN_FOR_METRIC = False`): `ModelName (LogLikelihood, Perplexity)`
 
 ## config.py
 **{used by `inference.py`}**
-This is the file where you should setup your code. The default settings for parameters are set in `config_sample.py`.
+This is the file where you should setup the code execution. The default settings for parameters are in `config_sample.py`.
 
 - `MAX_ITERATIONS` — maximum number of iterations in Expectation Maximization (EM) algorithm (applicable only for models using EM algorithm).
 - `DEBUG` — perform some additional tests when running algorithm (makes it slower)
@@ -104,7 +105,7 @@ Note, that `test` method is already implemented and uses `_getClickProbs` functi
 `ClickModel` class by itself represents a baseline click model which sets probability 0.5 to any click event.
 
 ### DbnModel
-This class is, in fact an implementation of general **DBN-IA** model ([Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search) ) that makes use of intent and presentation type of the documents when `ignoreIntent` and/or `ignoreLayout` is set to `False`. The `train` method is a probabilistic EM inference.
+This class is, in fact an implementation of a more general **DBN-IA** model ([Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search) ) that makes use of intent and presentation type of the documents when `ignoreIntent` and/or `ignoreLayout` is set to `False`. The `train` method is a probabilistic EM inference.
 
 If all what you want is just original DBN model by Chapelle et al. you should creat it as `DbnModel((0.9, 0.9, 0.9, 0.9))` (`ignoreIntent` and `ignoreLayout` is `True` by default).
 
@@ -112,7 +113,7 @@ If all what you want is just original DBN model by Chapelle et al. you should cr
 This is the same as `DbnModel((1.0, 1.0, 1.0, 1.0), ignoreIntents, ignoreLayout)`, but `train` method is just counting instead of EM algorithm. See *Chapelle, O. and Zhang, Y. 2009. A Dynamic Bayesian Network click model for web search ranking. WWW (2009).*, Section 5 (Algorithm 1).
 
 ### UbmModel
-This is the most general case for all UBM-like models. Changing `ignoreIntents`, `ignoreLayout` and `explorationBias` parameters you can get different models: **UBM, UBM-intent, UBM-layout, UBM-IA, EB_UBM, EB_UBM-intent, EB_UBM-layout, EB_UBM-IA** (for the names see [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)).
+This is the most general case for all UBM-like intent-aware models. Changing `ignoreIntents`, `ignoreLayout` and `explorationBias` parameters you can get different models: **UBM, UBM-intent, UBM-layout, UBM-IA, EB_UBM, EB_UBM-intent, EB_UBM-layout, EB_UBM-IA** (for the names see [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)).
 
 ### EbUbmModel (UbmModel)
 Just a shortcut for `UbmModel(ignoreIntents, ignoreLayout, explorationBias=True)` which correspond to the model called *Exploration Bias UBM* in *Chen, D. et al. 2012. Beyond ten blue links: enabling user click modeling in federated web search. WSDM (2012).*
@@ -136,7 +137,7 @@ You can also install and use [simplejson](http://pypi.python.org/pypi/simplejson
 ***
 
 # TRAIN_FOR_METRIC
-If you set `TRAIN_FOR_METRIC = True` the code will expect you to provide document relevances instead of urls. We make an assumption, that document attractiveness and/or satisfaction probability only depends on its human-assigned relevance grade.  A model will then be trained to assign the same attractiveness / satisfaction probabilities to all the documents with the same relevance.
+If you set `TRAIN_FOR_METRIC = True` the code will expect you to provide document relevances instead of URLs. We make an assumption, that document attractiveness and/or satisfaction probability only depends on its human-assigned relevance grade.  A model will then be trained to assign the same attractiveness / satisfaction probabilities to all the documents with the same relevance.
 
 ## Input Format
 The format in this case is similar to the one descirbed above with only difference that URLs should be replaced by the relevance grade of the corresponding document to the corresponding query. The query field will be ignored in that case. The relevance grade should take one of the following values:
