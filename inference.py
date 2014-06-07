@@ -33,6 +33,8 @@ class ClickModel(object):
         An abstract click model interface.
     """
 
+    __metaclass__ = ABCMeta
+
     def __init__(self, ignoreIntents=True, ignoreLayout=True):
         self.ignoreIntents = ignoreIntents
         self.ignoreLayout = ignoreLayout
@@ -48,7 +50,9 @@ class ClickModel(object):
     def test(self, sessions, reportPositionPerplexity=True):
         """
             Evaluates the prediciton power of the click model for a given sessions.
-            Returns the log-likelihood, perplexity and position perplexity.
+            Returns the log-likelihood, perplexity, position perplexity
+            (perplexity for each rank a.k.a. position in a SERP)
+            and separate perplexity values for clicks and non-clicks (skips).
         """
         logLikelihood = 0.0
         positionPerplexity = [0.0] * MAX_DOCS_PER_QUERY
@@ -59,13 +63,13 @@ class ClickModel(object):
         for s in sessions:
             iw = s.intentWeight
             intentWeight = {False: 1.0} if self.ignoreIntents else {False: 1 - iw, True: iw}
-            clickProbs = self._getClickProbs(s, possibleIntents)
+            clickProbs = self._get_click_probs(s, possibleIntents)
             N = len(s.clicks)
             if DEBUG:
                 assert N > 1
                 x = sum(clickProbs[i][N // 2] * intentWeight[i] for i in possibleIntents) / sum(clickProbs[i][N // 2 - 1] * intentWeight[i] for i in possibleIntents)
                 s.clicks[N // 2] = 1 if s.clicks[N // 2] == 0 else 0
-                clickProbs2 = self._getClickProbs(s, possibleIntents)
+                clickProbs2 = self._get_click_probs(s, possibleIntents)
                 y = sum(clickProbs2[i][N // 2] * intentWeight[i] for i in possibleIntents) / sum(clickProbs2[i][N // 2 - 1] * intentWeight[i] for i in possibleIntents)
                 assert abs(x + y - 1) < 0.01, (x, y)
             logLikelihood += math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents))      # log_e
@@ -95,9 +99,10 @@ class ClickModel(object):
         else:
             return logLikelihood / N / MAX_DOCS_PER_QUERY, perplexity
 
-    def _getClickProbs(self, s, possibleIntents):
+    def _get_click_probs(self, s, possibleIntents):
         """
-            Returns clickProbs list given the lis of s.clicks,
+            Returns click probabilities list for a given list of s.clicks.
+            For each intent $i$ and each rank $k$ we have:
             clickProbs[i][k] = P(C_1, ..., C_k | I=i)
         """
         return dict((i, [0.5 ** (k + 1) for k in xrange(len(s.clicks))]) for i in possibleIntents)
@@ -118,7 +123,7 @@ class ClickModel(object):
             Returns the list of log-click probabilities for all URLs in a given session.
             It assumes that there is only one intent.
         """
-        return _getClickProbs(self, session, [1])
+        return _get_click_probs(self, session, [1])
 
     @abstractmethod
     def get_model_relevances(self, session):
@@ -328,7 +333,7 @@ class DbnModel(ClickModel):
             sessionEstimate['clicks'][k] = sum(alpha[k + 1])
         return sessionEstimate
 
-    def _getClickProbs(self, s, possibleIntents):
+    def _get_click_probs(self, s, possibleIntents):
         """
             Returns clickProbs list:
             clickProbs[i][k] = P(C_1, ..., C_k | I=i)
@@ -531,7 +536,7 @@ class UbmModel(ClickModel):
             self.queryIntentsWeights[q] = sum(intentWeights) / len(intentWeights)
 
     def _getSessionProb(self, s):
-        clickProbs = self._getClickProbs(s, [False, True])
+        clickProbs = self._get_click_probs(s, [False, True])
         N = len(s.clicks)
         return clickProbs[False][N - 1] / clickProbs[True][N - 1]
 
@@ -540,7 +545,7 @@ class UbmModel(ClickModel):
         index = (2 if layout[k] else 0) + (1 if intent else 0)
         return gammas[index][k][k - prevClick - 1]
 
-    def _getClickProbs(self, s, possibleIntents):
+    def _get_click_probs(self, s, possibleIntents):
         """
             Returns clickProbs list
             clickProbs[i][k] = P(C_1, ..., C_k | I=i)
@@ -610,7 +615,7 @@ class DcmModel(ClickModel):
             for g in xrange(self.gammaTypesNum):
                 self.gammas[k][g] = gammaFractions[k][g][0] / (gammaFractions[k][g][0] + gammaFractions[k][g][1])
 
-    def _getClickProbs(self, s, possibleIntents):
+    def _get_click_probs(self, s, possibleIntents):
         clickProbs = {False: [], True: []}          # P(C_1, ..., C_k)
         query = s.query
         layout = [False] * len(s.layout) if self.ignoreLayout else s.layout
@@ -620,11 +625,14 @@ class DcmModel(ClickModel):
                 r = self.urlRelevances[i][query][s.results[k]]
                 prevProb = 1 if k == 0 else clickProbs[i][-1]
                 if c == 0:
-                    clickProbs[i].append(prevProb - examinationProb * r)    # P(C_1, ..., C_k = 0) = P(C_1, ..., C_{k-1}) - P(C_1, ..., C_k = 1)
-                    examinationProb *= 1 - r                                # P(C_1, ..., C_k, E_{k+1} = 1) = P(E_{k+1} = 1 | C_k, E_k = 1) * P(C_k | E_k = 1) *  P(C_1, ..., C_{k - 1}, E_k = 1)
+                    # P(C_1, ..., C_k = 0) = P(C_1, ..., C_{k-1}) - P(C_1, ..., C_k = 1)
+                    clickProbs[i].append(prevProb - examinationProb * r)
+                    # P(C_1, ..., C_k, E_{k+1} = 1) = P(E_{k+1} = 1 | C_k, E_k = 1) * P(C_k | E_k = 1) *  P(C_1, ..., C_{k - 1}, E_k = 1)
+                    examinationProb *= 1 - r
                 else:
                     clickProbs[i].append(examinationProb * r)
-                    examinationProb *= self.getGamma(self.gammas[k], k, layout, i) * r  # P(C_1, ..., C_k, E_{k+1} = 1) = P(E_{k+1} = 1 | C_k, E_k = 1) * P(C_k | E_k = 1) *  P(C_1, ..., C_{k - 1}, E_k = 1)
+                    # P(C_1, ..., C_k, E_{k+1} = 1) = P(E_{k+1} = 1 | C_k, E_k = 1) * P(C_k | E_k = 1) *  P(C_1, ..., C_{k - 1}, E_k = 1)
+                    examinationProb *= self.getGamma(self.gammas[k], k, layout, i) * r
         return clickProbs
 
     @staticmethod
