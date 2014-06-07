@@ -3,8 +3,14 @@
 import sys
 import glob
 
-from clickmodels.inference import *
 from clickmodels.bootstrap import bootstrap
+from clickmodels.inference import *
+from clickmodels.input_reader import InputReader
+
+try:
+    from config import *
+except:
+    from clickmodels.config_sample import *
 
 
 def perpGain(r1, r2):
@@ -27,20 +33,28 @@ def avg(l):
     return float(s) / n if n else 0
 
 
-# TESTED_MODEL_PAIRS = ['UBM', 'EB_UBM', 'EB_UBM-IA']
-TESTED_MODEL_PAIRS = ['UBM']
+TESTED_MODEL_PAIRS = ['UBM', 'EB_UBM', 'UBMvsDBN']
 
 if 'RBP' in TESTED_MODEL_PAIRS:
     import scipy
     import scipy.optimize
 
 MODEL_CONSTRUCTORS = {
-    'DBN': (lambda: DbnModel((0.9, 0.9, 0.9, 0.9)), lambda: DbnModel((1.0, 0.9, 1.0, 0.9), ignoreIntents=False, ignoreLayout=False)),
-    'UBMvsDBN': (UbmModel, lambda: DbnModel((0.9, 0.9, 0.9, 0.9))),
-    'UBM': (UbmModel, lambda: UbmModel(ignoreIntents=False, ignoreLayout=False)),
-    'EB_UBM': (UbmModel, EbUbmModel, lambda: EbUbmModel(ignoreIntents=False, ignoreLayout=False)),
-    'DCM': (DcmModel, lambda: DcmModel(ignoreIntents=False, ignoreLayout=False)),
-    'RBP': (SimplifiedRbpModel, lambda: RbpModel(ignoreIntents=False, ignoreLayout=False))
+    'DBN': (lambda config: DbnModel((0.9, 0.9, 0.9, 0.9), config=config),
+            lambda config: DbnModel((1.0, 0.9, 1.0, 0.9),
+                                    ignoreIntents=False, ignoreLayout=False, config=config)),
+    'UBMvsDBN': (lambda config: UbmModel(config=config),
+                 lambda config: DbnModel((0.9, 0.9, 0.9, 0.9), config=config)),
+    'UBM': (lambda config: UbmModel(config=config),
+            lambda config: UbmModel(ignoreIntents=False, ignoreLayout=False, config=config)),
+    'EB_UBM': (lambda config: UbmModel(config=config),
+               lambda config: EbUbmModel(config=config),
+               lambda config: EbUbmModel(ignoreIntents=False, ignoreLayout=False,
+                                         config=config)),
+    'DCM': (lambda config: DcmModel(config=config),
+            lambda config: DcmModel(ignoreIntents=False, ignoreLayout=False, config=config)),
+    'RBP': (lambda config: SimplifiedRbpModel(config=config),
+            lambda: RbpModel(ignoreIntents=False, ignoreLayout=False, config=config))
 }
 
 if __name__ == '__main__':
@@ -56,14 +70,28 @@ if __name__ == '__main__':
     for fileNumber in xrange(N):
         trainFile = interestingFiles[2 * fileNumber]
         testFile = interestingFiles[2 * fileNumber + 1]
-        readInput = InputReader()
+        readInput = InputReader(MIN_DOCS_PER_QUERY, MAX_DOCS_PER_QUERY,
+                                EXTENDED_LOG_FORMAT, SERP_SIZE,
+                                TRAIN_FOR_METRIC,
+                                discard_no_clicks=True)
         trainSessions = readInput(open(trainFile))
         testSessions = readInput(open(testFile))
+        config = {
+            'MAX_QUERY_ID': readInput.current_query_id + 1,
+            'MAX_ITERATIONS': MAX_ITERATIONS,
+            'DEBUG': DEBUG,
+            'PRETTY_LOG': PRETTY_LOG,
+            'MAX_DOCS_PER_QUERY': MAX_DOCS_PER_QUERY,
+            'SERP_SIZE': SERP_SIZE,
+            'TRANSFORM_LOG': TRANSFORM_LOG,
+            'QUERY_INDEPENDENT_PAGER': QUERY_INDEPENDENT_PAGER,
+            'DEFAULT_REL': DEFAULT_REL
+        }
         for modelName in TESTED_MODEL_PAIRS:
             res = []
             models = MODEL_CONSTRUCTORS[modelName]
             for idx, model in enumerate(models):
-                m = model()
+                m = model(config)
                 m.train(trainSessions)
                 currentResult = m.test(testSessions, reportPositionPerplexity=True)
                 res.append(currentResult)
