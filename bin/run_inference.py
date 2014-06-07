@@ -26,7 +26,10 @@ if __name__ == '__main__':
                 for g4 in interestingValues:
                     allCombinations.append((g1, g2, g3, g4))
 
-    readInput = InputReader()
+    readInput = InputReader(MIN_DOCS_PER_QUERY, MAX_DOCS_PER_QUERY,
+                            EXTENDED_LOG_FORMAT, SERP_SIZE,
+                            TRAIN_FOR_METRIC,
+                            discard_no_clicks=True)
     sessions = readInput(sys.stdin)
 
     if TRAIN_FOR_METRIC and PRINT_EBU_STATS:
@@ -60,9 +63,15 @@ if __name__ == '__main__':
 
     if TRANSFORM_LOG:
         assert EXTENDED_LOG_FORMAT
-        sessions, testSessions = ([x for x in (InputReader.mergeExtraToSessionItem(s) for s in ss) if x] for ss in [sessions, testSessions])
+        sessions, testSessions = (
+            [x for x in (InputReader.mergeExtraToSessionItem(s, SERP_SIZE) for s in ss) if x] \
+                for ss in [sessions, testSessions]
+        )
     else:
-        sessions, testSessions = ([s for s in ss if InputReader.mergeExtraToSessionItem(s)] for ss in [sessions, testSessions])
+        sessions, testSessions = (
+            [s for s in ss if InputReader.mergeExtraToSessionItem(s, SERP_SIZE)] \
+                for ss in [sessions, testSessions]
+        )
 
     print 'Train sessions: %d, test sessions: %d' % (len(sessions), len(testSessions))
     print 'Number of train sessions with 10+ urls shown:', len([s for s in sessions if len(s.results) > SERP_SIZE + 1])
@@ -76,17 +85,25 @@ if __name__ == '__main__':
     #sys.exit(0)
 
     config = {
-        'MAX_QUERY_ID': readInput.current_query_id + 1
+        'MAX_QUERY_ID': readInput.current_query_id + 1,
+        'MAX_ITERATIONS': MAX_ITERATIONS,
+        'DEBUG': DEBUG,
+        'PRETTY_LOG': PRETTY_LOG,
+        'MAX_DOCS_PER_QUERY': MAX_DOCS_PER_QUERY,
+        'SERP_SIZE': SERP_SIZE,
+        'TRANSFORM_LOG': TRANSFORM_LOG,
+        'QUERY_INDEPENDENT_PAGER': QUERY_INDEPENDENT_PAGER,
+        'DEFAULT_REL': DEFAULT_REL
     }
     del readInput       # needed to minimize memory consumption (see gc.collect() below)
 
     if 'Baseline' in USED_MODELS:
-        baselineModel = ClickModel()
+        baselineModel = ClickModel(config=config)
         baselineModel.train(sessions)
         print 'Baseline:', baselineModel.test(testSessions)
 
     if 'SDBN' in USED_MODELS:
-        sdbnModel = SimplifiedDbnModel()
+        sdbnModel = SimplifiedDbnModel(config=config)
         sdbnModel.train(sessions)
         if TRANSFORM_LOG:
             print '(a_p, s_p) = ', sdbnModel.urlRelevances[False][0]['PAGER']
@@ -94,7 +111,7 @@ if __name__ == '__main__':
         del sdbnModel        # needed to minimize memory consumption (see gc.collect() below)
 
     if 'UBM' in USED_MODELS:
-        ubmModel = UbmModel()
+        ubmModel = UbmModel(config=config)
         ubmModel.train(sessions)
         if TRAIN_FOR_METRIC:
             print '\n'.join(['%s\t%f' % r for r in \
@@ -108,27 +125,27 @@ if __name__ == '__main__':
         del ubmModel       # needed to minimize memory consumption (see gc.collect() below)
 
     if 'UBM-IA' in USED_MODELS:
-        ubmModel = UbmModel(ignoreIntents=False, ignoreLayout=False)
+        ubmModel = UbmModel(ignoreIntents=False, ignoreLayout=False, config=config)
         ubmModel.train(sessions)
         print 'UBM-IA', ubmModel.test(testSessions)
         del ubmModel       # needed to minimize memory consumption (see gc.collect() below)
 
     if 'EB_UBM' in USED_MODELS:
-        ebUbmModel = EbUbmModel()
+        ebUbmModel = EbUbmModel(config=config)
         ebUbmModel.train(sessions)
         # print 'Exploration bias:', ebUbmModel.e
         print 'EB_UBM', ebUbmModel.test(testSessions)
         del ebUbmModel       # needed to minimize memory consumption (see gc.collect() below)
 
     if 'EB_UBM-IA' in USED_MODELS:
-        ebUbmModel = EbUbmModel(ignoreIntents=False, ignoreLayout=False)
+        ebUbmModel = EbUbmModel(ignoreIntents=False, ignoreLayout=False, config=config)
         ebUbmModel.train(sessions)
         # print 'Exploration bias:', ebUbmModel.e
         print 'EB_UBM-IA', ebUbmModel.test(testSessions)
         del ebUbmModel       # needed to minimize memory consumption (see gc.collect() below)
 
     if 'DCM' in USED_MODELS:
-        dcmModel = DcmModel()
+        dcmModel = DcmModel(config=config)
         dcmModel.train(sessions)
         if TRAIN_FOR_METRIC:
             print '\n'.join(['%s\t%f' % r for r in \
@@ -139,14 +156,14 @@ if __name__ == '__main__':
         del dcmModel       # needed to minimize memory consumption (see gc.collect() below)
 
     if 'DCM-IA' in USED_MODELS:
-        dcmModel = DcmModel(ignoreIntents=False, ignoreLayout=False)
+        dcmModel = DcmModel(ignoreIntents=False, ignoreLayout=False, config=config)
         dcmModel.train(sessions)
         # print 'DCM gammas:', dcmModel.gammas
         print 'DCM-IA', dcmModel.test(testSessions)
         del dcmModel       # needed to minimize memory consumption (see gc.collect() below)
 
     if 'DBN' in USED_MODELS:
-        dbnModel = DbnModel((0.9, 0.9, 0.9, 0.9))
+        dbnModel = DbnModel((0.9, 0.9, 0.9, 0.9), config=config)
         dbnModel.train(sessions)
         print 'DBN:', dbnModel.test(testSessions)
         for session in testSessions:
@@ -157,7 +174,7 @@ if __name__ == '__main__':
     if 'DBN-IA' in USED_MODELS:
         for gammas in allCombinations:
             gc.collect()
-            dbnModel = DbnModel(gammas, ignoreIntents=False, ignoreLayout=False)
+            dbnModel = DbnModel(gammas, ignoreIntents=False, ignoreLayout=False, config=config)
             dbnModel.train(sessions)
             print 'DBN-IA: %.2f %.2f %.2f %.2f' % gammas, dbnModel.test(testSessions)
 

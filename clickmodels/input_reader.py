@@ -1,10 +1,26 @@
+from collections import namedtuple
+import json
+
+DEBUG = False
+
+SessionItem = namedtuple('SessionItem', ['intentWeight', 'query', 'results', 'layout', 'clicks', 'extraclicks'])
+
 class InputReader:
-    def __init__(self, discardNoClicks=True):
+    def __init__(self, min_docs_per_query, max_docs_per_query,
+                 extended_log_format, serp_size,
+                 train_for_metric,
+                 discard_no_clicks=True):
         self.url_to_id = {}
         self.query_to_id = {}
         self.current_url_id = 1
         self.current_query_id = 0
-        self.discardNoClicks = discardNoClicks
+
+        self.min_docs_per_query = min_docs_per_query
+        self.max_docs_per_query = max_docs_per_query
+        self.extended_log_format = extended_log_format
+        self.serp_size = serp_size
+        self.train_for_metric = train_for_metric
+        self.discard_no_clicks = discard_no_clicks
 
     def __call__(self, f):
         sessions = []
@@ -13,10 +29,10 @@ class InputReader:
             urls, layout, clicks = map(json.loads, [urls, layout, clicks])
             extra = {}
             urlsObserved = 0
-            if EXTENDED_LOG_FORMAT:
-                maxLen = MAX_DOCS_PER_QUERY
+            if self.extended_log_format:
+                maxLen = self.max_docs_per_query
                 if TRANSFORM_LOG:
-                    maxLen -= MAX_DOCS_PER_QUERY // SERP_SIZE
+                    maxLen -= self.max_docs_per_query // self.serp_size
                 urls, _ = self.convertToList(urls, '', maxLen)
                 for u in urls:
                     if u == '':
@@ -26,13 +42,13 @@ class InputReader:
                 layout, _ = self.convertToList(layout, False, urlsObserved)
                 clicks, extra = self.convertToList(clicks, 0, urlsObserved)
             else:
-                urls = urls[:MAX_DOCS_PER_QUERY]
+                urls = urls[:self.max_docs_per_query]
                 urlsObserved = len(urls)
                 layout = layout[:urlsObserved]
                 clicks = clicks[:urlsObserved]
-            if urlsObserved < MIN_DOCS_PER_QUERY:
+            if urlsObserved < self.min_docs_per_query:
                 continue
-            if self.discardNoClicks and not any(clicks):
+            if self.discard_no_clicks and not any(clicks):
                 continue
             if float(intentWeight) > 1 or float(intentWeight) < 0:
                 continue
@@ -43,26 +59,26 @@ class InputReader:
                 self.query_to_id[(query, region)] = self.current_query_id
                 self.current_query_id += 1
             intentWeight = float(intentWeight)
-            # add fake G_{MAX_DOCS_PER_QUERY+1} to simplify gamma calculation:
+            # add fake G_{self.max_docs_per_query+1} to simplify gamma calculation:
             layout.append(False)
             url_ids = []
             for u in urls:
                 if u in ['_404', 'STUPID', 'VIRUS', 'SPAM']:
                     # convert Yandex-specific fields to standard ones
-                    assert TRAIN_FOR_METRIC
+                    assert self.train_for_metric
                     u = 'IRRELEVANT'
                 if u.startswith('RELEVANT_'):
                     # convert Yandex-specific fields to standard ones
-                    assert TRAIN_FOR_METRIC
+                    assert self.train_for_metric
                     u = 'RELEVANT'
                 if u in self.url_to_id:
-                    if TRAIN_FOR_METRIC:
+                    if self.train_for_metric:
                         url_ids.append(u)
                     else:
                         url_ids.append(self.url_to_id[u])
                 else:
                     urlid = self.current_url_id
-                    if TRAIN_FOR_METRIC:
+                    if self.train_for_metric:
                         url_ids.append(u)
                     else:
                         url_ids.append(urlid)
@@ -72,8 +88,8 @@ class InputReader:
         return sessions
 
     @staticmethod
-    def convertToList(sparseDict, defaultElem=0, maxLen=MAX_DOCS_PER_QUERY):
-        """ Convert dict of the format {"0": doc0, "13": doc13} to the list of the length MAX_DOCS_PER_QUERY """
+    def convertToList(sparseDict, defaultElem, maxLen):
+        """ Convert dict of the format {"0": doc0, "13": doc13} to the list of the length maxLen"""
         convertedList = [defaultElem] * maxLen
         extra = {}
         for k, v in sparseDict.iteritems():
@@ -84,7 +100,7 @@ class InputReader:
         return convertedList, extra
 
     @staticmethod
-    def mergeExtraToSessionItem(s):
+    def mergeExtraToSessionItem(s, serp_size):
         """ Put pager click into the session item (presented as a fake URL) """
         if s.extraclicks.get('TRANSFORMED', False):
             return s
@@ -93,8 +109,8 @@ class InputReader:
             newLayout = []
             newClicks = []
             a = 0
-            while a + SERP_SIZE <= len(s.results):
-                b = a + SERP_SIZE
+            while a + serp_size <= len(s.results):
+                b = a + serp_size
                 newUrls += s.results[a:b]
                 newLayout += s.layout[a:b]
                 newClicks += s.clicks[a:b]
@@ -108,6 +124,6 @@ class InputReader:
             if DEBUG:
                 assert len(newUrls) == len(newClicks)
                 assert len(newUrls) + 1 == len(newLayout), (len(newUrls), len(newLayout))
-                assert len(newUrls) < len(s.results) + MAX_DOCS_PER_QUERY / SERP_SIZE, (len(s.results), len(newUrls))
+                assert len(newUrls) < len(s.results) + self.max_docs_per_query / serp_size, (len(s.results), len(newUrls))
             return SessionItem(s.intentWeight, s.query, newUrls, newLayout, newClicks, {'TRANSFORMED': True})
 

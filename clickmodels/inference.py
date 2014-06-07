@@ -1,15 +1,12 @@
-import sys
+from collections import defaultdict
+from datetime import datetime
 import gc
 import json
 import math
-from collections import defaultdict, namedtuple
-from datetime import datetime
 import random
+import sys
 
-from config_sample import *
-
-
-SessionItem = namedtuple('SessionItem', ['intentWeight', 'query', 'results', 'layout', 'clicks', 'extraclicks'])
+from .config_sample import MAX_ITERATIONS, DEBUG, PRETTY_LOG, MAX_DOCS_PER_QUERY, SERP_SIZE, TRANSFORM_LOG, QUERY_INDEPENDENT_PAGER, DEFAULT_REL
 
 
 class NotImplementedError(Exception):
@@ -40,17 +37,19 @@ class ClickModel:
             and separate perplexity values for clicks and non-clicks (skips).
         """
         logLikelihood = 0.0
-        positionPerplexity = [0.0] * MAX_DOCS_PER_QUERY
-        positionPerplexityClickSkip = [[0.0, 0.0] for i in xrange(MAX_DOCS_PER_QUERY)]
-        counts = [0] * MAX_DOCS_PER_QUERY
-        countsClickSkip = [[0, 0] for i in xrange(MAX_DOCS_PER_QUERY)]
+        positionPerplexity = [0.0] * self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY)
+        positionPerplexityClickSkip = [[0.0, 0.0] \
+                for i in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))]
+        counts = [0] * self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY)
+        countsClickSkip = [[0, 0] \
+                for i in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))]
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         for s in sessions:
             iw = s.intentWeight
             intentWeight = {False: 1.0} if self.ignoreIntents else {False: 1 - iw, True: iw}
             clickProbs = self._get_click_probs(s, possibleIntents)
-            N = min(len(s.clicks), MAX_DOCS_PER_QUERY)
-            if DEBUG:
+            N = min(len(s.clicks), self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))
+            if self.config.get('DEBUG', DEBUG):
                 assert N > 1
                 x = sum(clickProbs[i][N // 2] * intentWeight[i] for i in possibleIntents) / sum(clickProbs[i][N // 2 - 1] * intentWeight[i] for i in possibleIntents)
                 s.clicks[N // 2] = 1 if s.clicks[N // 2] == 0 else 0
@@ -62,8 +61,9 @@ class ClickModel:
             correctedRank = 0    # we are going to skip clicks on fake pager urls
             for k, click in enumerate(s.clicks):
                 click = 1 if click else 0
-                if s.extraclicks.get('TRANSFORMED', False) and (k + 1) % (SERP_SIZE + 1) == 0:
-                    if DEBUG:
+                if s.extraclicks.get('TRANSFORMED', False) and \
+                        (k + 1) % (self.config.get('SERP_SIZE', SERP_SIZE) + 1) == 0:
+                    if self.config.get('DEBUG', DEBUG):
                         assert s.results[k] == 'PAGER'
                     continue
                 # P(C_k | C_1, ..., C_{k-1}) = \sum_I P(C_1, ..., C_k | I) P(I) / \sum_I P(C_1, ..., C_{k-1} | I) P(I)
@@ -110,7 +110,7 @@ class ClickModel:
         intentWeight = {False: 1.0} if self.ignoreIntents else \
                 {False: 1 - session.intentWeight, True: session.intentWeight}
         clickProbs = self._get_click_probs(s, possibleIntents)
-        N = min(len(session.clicks), MAX_DOCS_PER_QUERY)
+        N = min(len(session.clicks), self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))
         # Marginalize over possible intents: P(C_1, ..., C_N) = \sum_{i} P(C_1, ..., C_N | I=i) P(I=i)
         return math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents)) / N
 
@@ -176,19 +176,23 @@ class DbnModel(ClickModel):
 
     def train(self, sessions):
         possibleIntents = [False] if self.ignoreIntents else [False, True]
-        max_query_id = self.config.get('MAX_QUERY_ID', 100000)
+        max_query_id = self.config.get('MAX_QUERY_ID')
+        if max_query_id is None:
+            print >>sys.stderr, 'WARNING: no MAX_QUERY_ID specified for', self
+            max_query_id = 100000
         # intent -> query -> url -> (a_u, s_u)
         self.urlRelevances = dict((i,
-                [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) \
+                [defaultdict(lambda: {'a': self.config.get('DEFAULT_REL', DEFAULT_REL),
+                                      's': self.config.get('DEFAULT_REL', DEFAULT_REL)}) \
                     for q in xrange(max_query_id)]) for i in possibleIntents
         )
         # here we store distribution of posterior intent weights given train data
         self.queryIntentsWeights = defaultdict(lambda: [])
         # EM algorithm
-        if not PRETTY_LOG:
+        if not self.config.get('PRETTY_LOG', PRETTY_LOG):
             print >>sys.stderr, '-' * 80
             print >>sys.stderr, 'Start. Current time is', datetime.now()
-        for iteration_count in xrange(MAX_ITERATIONS):
+        for iteration_count in xrange(self.config.get('MAX_ITERATIONS', MAX_ITERATIONS)):
             # urlRelFractions[intent][query][url][r][1] --- coefficient before \log r
             # urlRelFractions[intent][query][url][r][0] --- coefficient before \log (1 - r)
             urlRelFractions = dict((i, [defaultdict(lambda: {'a': [1.0, 1.0], 's': [1.0, 1.0]}) for q in xrange(max_query_id)]) for i in [False, True])
@@ -220,13 +224,12 @@ class DbnModel(ClickModel):
                             # Update s
                             urlRelFractions[intent][query][url]['s'][1] += sessionEstimate[intent]['s'][k] * p_I__C_G[intent]
                             urlRelFractions[intent][query][url]['s'][0] += (1 - sessionEstimate[intent]['s'][k]) * p_I__C_G[intent]
-            if not PRETTY_LOG:
+            if not self.config.get('PRETTY_LOG', PRETTY_LOG):
                 sys.stderr.write('E')
             # M step
             # update parameters and record mean square error
             sum_square_displacement = 0.0
             Q_functional = 0.0
-            num_points = 0
             for i in possibleIntents:
                 for query, d in enumerate(urlRelFractions[i]):
                     if not d:
@@ -234,23 +237,21 @@ class DbnModel(ClickModel):
                     for url, relFractions in d.iteritems():
                         a_u_new = relFractions['a'][1] / (relFractions['a'][1] + relFractions['a'][0])
                         sum_square_displacement += (a_u_new - self.urlRelevances[i][query][url]['a']) ** 2
-                        num_points += 1
                         self.urlRelevances[i][query][url]['a'] = a_u_new
                         Q_functional += relFractions['a'][1] * math.log(a_u_new) + relFractions['a'][0] * math.log(1 - a_u_new)
                         s_u_new = relFractions['s'][1] / (relFractions['s'][1] + relFractions['s'][0])
                         sum_square_displacement += (s_u_new - self.urlRelevances[i][query][url]['s']) ** 2
-                        num_points += 1
                         self.urlRelevances[i][query][url]['s'] = s_u_new
                         Q_functional += relFractions['s'][1] * math.log(s_u_new) + relFractions['s'][0] * math.log(1 - s_u_new)
-            if not PRETTY_LOG:
+            if not self.config.get('PRETTY_LOG', PRETTY_LOG):
                 sys.stderr.write('M\n')
-            rmsd = math.sqrt(sum_square_displacement / (num_points if TRAIN_FOR_METRIC else 1.0))
-            if PRETTY_LOG:
+            rmsd = math.sqrt(sum_square_displacement)
+            if self.config.get('PRETTY_LOG', PRETTY_LOG):
                 sys.stderr.write('%d..' % (iteration_count + 1))
             else:
-                print >>sys.stderr, 'Iteration: %d, RMSD: %.10f' % (iteration_count + 1, rmsd)
+                print >>sys.stderr, 'Iteration: %d, ERROR: %f' % (iteration_count + 1, rmsd)
                 print >>sys.stderr, 'Q functional: %f' % Q_functional
-        if PRETTY_LOG:
+        if self.config.get('PRETTY_LOG', PRETTY_LOG):
             sys.stderr.write('\n')
         for q, intentWeights in self.queryIntentsWeights.iteritems():
             self.queryIntentsWeights[q] = sum(intentWeights) / len(intentWeights)
@@ -271,9 +272,10 @@ class DbnModel(ClickModel):
         return gammas[index]
 
     @staticmethod
-    def getForwardBackwardEstimates(positionRelevances, gammas, layout, clicks, intent):
+    def getForwardBackwardEstimates(positionRelevances, gammas, layout, clicks, intent,
+                                    debug=False):
         N = len(clicks)
-        if DEBUG:
+        if debug:
             assert N + 1 == len(layout)
         alpha = [[0.0, 0.0] for i in xrange(N + 1)]
         beta = [[0.0, 0.0] for i in xrange(N + 1)]
@@ -306,16 +308,19 @@ class DbnModel(ClickModel):
         # Returns {'a': P(A_k | I, C, G), 's': P(S_k | I, C, G), 'C': P(C | I, G), 'clicks': P(C_k | C_1, ..., C_{k-1}, I, G)} as a dict
         # sessionEstimate[True]['a'][k] = P(A_k = 1 | I = 'Fresh', C, G), probability of A_k = 0 can be calculated as 1 - p
         N = len(clicks)
-        if DEBUG:
+        if self.config.get('DEBUG', DEBUG):
             assert N + 1 == len(layout)
         sessionEstimate = {'a': [0.0] * N, 's': [0.0] * N, 'e': [[0.0, 0.0] for k in xrange(N)], 'C': 0.0, 'clicks': [0.0] * N}
-        alpha, beta = self.getForwardBackwardEstimates(positionRelevances, self.gammas, layout, clicks, intent)
+        alpha, beta = self.getForwardBackwardEstimates(positionRelevances,
+                                                       self.gammas, layout, clicks, intent,
+                                                       debug=self.config.get('DEBUG', DEBUG)
+        )
         try:
             varphi = [((a[0] * b[0]) / (a[0] * b[0] + a[1] * b[1]), (a[1] * b[1]) / (a[0] * b[0] + a[1] * b[1])) for a, b in zip(alpha, beta)]
         except ZeroDivisionError:
             print >>sys.stderr, alpha, beta, [(a[0] * b[0] + a[1] * b[1]) for a, b in zip(alpha, beta)], positionRelevances
             sys.exit(1)
-        if DEBUG:
+        if self.config.get('DEBUG', DEBUG):
             assert all(ph[0] < 0.01 for ph, c in zip(varphi[:N], clicks) if c != 0), (alpha, beta, varphi, clicks)
         # calculate P(C | I, G) for k = 0
         sessionEstimate['C'] = alpha[0][0] * beta[0][0] + alpha[0][1] * beta[0][1]      # == 0 + 1 * beta[0][1]
@@ -345,7 +350,7 @@ class DbnModel(ClickModel):
             positionRelevances[intent] = {}
             for r in ['a', 's']:
                 positionRelevances[intent][r] = [self.urlRelevances[intent][s.query][url][r] for url in s.results]
-                if QUERY_INDEPENDENT_PAGER:
+                if self.config.get('QUERY_INDEPENDENT_PAGER', QUERY_INDEPENDENT_PAGER):
                     for k, u in enumerate(s.results):
                         if u == 'PAGER':
                             # use dummy 0 query for all fake pager URLs
@@ -400,13 +405,16 @@ class DbnModel(ClickModel):
 
 
 class SimplifiedDbnModel(DbnModel):
-    def __init__(self, ignoreIntents=True, ignoreLayout=True):
+    def __init__(self, ignoreIntents=True, ignoreLayout=True, config=None):
         assert ignoreIntents
         assert ignoreLayout
-        DbnModel.__init__(self, (1.0, 1.0, 1.0, 1.0), ignoreIntents, ignoreLayout)
+        DbnModel.__init__(self, (1.0, 1.0, 1.0, 1.0), ignoreIntents, ignoreLayout, config)
 
     def train(self, sessions):
-        max_query_id = self.config.get('MAX_QUERY_ID', 100000)
+        max_query_id = self.config.get('MAX_QUERY_ID')
+        if max_query_id is None:
+            print >>sys.stderr, 'WARNING: no MAX_QUERY_ID specified for', self
+            max_query_id = 100000
         urlRelFractions = [defaultdict(lambda: {'a': [1.0, 1.0], 's': [1.0, 1.0]}) for q in xrange(max_query_id)]
         for s in sessions:
             query = s.query
@@ -416,8 +424,9 @@ class SimplifiedDbnModel(DbnModel):
                     lastClickedPos = k
             for k, (u, c) in enumerate(zip(s.results, s.clicks[:(lastClickedPos + 1)])):
                 tmpQuery = query
-                if QUERY_INDEPENDENT_PAGER and u == 'PAGER':
-                    assert TRANSFORM_LOG
+                if self.config.get('QUERY_INDEPENDENT_PAGER', QUERY_INDEPENDENT_PAGER) \
+                        and u == 'PAGER':
+                    assert self.config.get('TRANSFORM_LOG', TRANSFORM_LOG)
                     # the same dummy query for all pagers
                     query = 0
                 if c != 0:
@@ -428,9 +437,12 @@ class SimplifiedDbnModel(DbnModel):
                         urlRelFractions[query][u]['s'][0] += 1
                 else:
                     urlRelFractions[query][u]['a'][0] += 1
-                if QUERY_INDEPENDENT_PAGER:
+                if self.config.get('QUERY_INDEPENDENT_PAGER', QUERY_INDEPENDENT_PAGER):
                     query = tmpQuery
-        self.urlRelevances = dict((i, [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) for q in xrange(max_query_id)]) for i in [False])
+        self.urlRelevances = dict((i,
+                [defaultdict(lambda: {'a': self.config.get('DEFAULT_REL', DEFAULT_REL),
+                                      's': self.config.get('DEFAULT_REL', DEFAULT_REL)}) \
+                        for q in xrange(max_query_id)]) for i in [False])
         for query, d in enumerate(urlRelFractions):
             if not d:
                 continue
@@ -449,24 +461,37 @@ class UbmModel(ClickModel):
         ClickModel.__init__(self, ignoreIntents, ignoreLayout, config)
 
     def train(self, sessions):
-        max_query_id = self.config.get('MAX_QUERY_ID', 100000)
+        max_query_id = self.config.get('MAX_QUERY_ID')
+        if max_query_id is None:
+            print >>sys.stderr, 'WARNING: no MAX_QUERY_ID specified for', self
+            max_query_id = 100000
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         # alpha: intent -> query -> url -> "attractiveness probability"
-        self.alpha = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(max_query_id)]) for i in possibleIntents)
+        self.alpha = dict((i,
+                [defaultdict(lambda: self.config.get('DEFAULT_REL', DEFAULT_REL)) \
+                        for q in xrange(max_query_id)]) for i in possibleIntents)
         # gamma: freshness of the current result: gammaType -> rank -> "distance from the last click" - 1 -> examination probability
-        self.gamma = [[[0.5 for d in xrange(MAX_DOCS_PER_QUERY)] for r in xrange(MAX_DOCS_PER_QUERY)] for g in xrange(self.gammaTypesNum)]
+        self.gamma = [[[0.5 \
+            for d in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))] \
+                for r in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))] \
+                    for g in xrange(self.gammaTypesNum)]
         if self.explorationBias:
-            self.e = [0.5 for p in xrange(MAX_DOCS_PER_QUERY)]
-        if not PRETTY_LOG:
+            self.e = [0.5 \
+                    for p in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))]
+        if not self.config.get('PRETTY_LOG', PRETTY_LOG):
             print >>sys.stderr, '-' * 80
             print >>sys.stderr, 'Start. Current time is', datetime.now()
-        for iteration_count in xrange(MAX_ITERATIONS):
+        for iteration_count in xrange(self.config.get('MAX_ITERATIONS', MAX_ITERATIONS)):
             self.queryIntentsWeights = defaultdict(lambda: [])
             # not like in DBN! xxxFractions[0] is a numerator while xxxFraction[1] is a denominator
             alphaFractions = dict((i, [defaultdict(lambda: [1.0, 2.0]) for q in xrange(max_query_id)]) for i in possibleIntents)
-            gammaFractions = [[[[1.0, 2.0] for d in xrange(MAX_DOCS_PER_QUERY)] for r in xrange(MAX_DOCS_PER_QUERY)] for g in xrange(self.gammaTypesNum)]
+            gammaFractions = [[[[1.0, 2.0] \
+                for d in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))] \
+                    for r in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))] \
+                        for g in xrange(self.gammaTypesNum)]
             if self.explorationBias:
-                eFractions = [[1.0, 2.0] for p in xrange(MAX_DOCS_PER_QUERY)]
+                eFractions = [[1.0, 2.0] \
+                        for p in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))]
             # E-step
             for s in sessions:
                 query = s.query
@@ -509,40 +534,36 @@ class UbmModel(ClickModel):
                             eFractions[firstVerticalPos][1] += 1 * p_I__C_G[intent]
                     if c != 0:
                         prevClick = rank
-            if not PRETTY_LOG:
+            if not self.config.get('PRETTY_LOG', PRETTY_LOG):
                 sys.stderr.write('E')
             # M-step
             sum_square_displacement = 0.0
-            num_points = 0
             for i in possibleIntents:
                 for q in xrange(max_query_id):
                     for url, aF in alphaFractions[i][q].iteritems():
                         new_alpha = aF[0] / aF[1]
                         sum_square_displacement += (self.alpha[i][q][url] - new_alpha) ** 2
-                        num_points += 1
                         self.alpha[i][q][url] = new_alpha
             for g in xrange(self.gammaTypesNum):
-                for r in xrange(MAX_DOCS_PER_QUERY):
-                    for d in xrange(MAX_DOCS_PER_QUERY):
+                for r in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY)):
+                    for d in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY)):
                         gF = gammaFractions[g][r][d]
                         new_gamma = gF[0] / gF[1]
                         sum_square_displacement += (self.gamma[g][r][d] - new_gamma) ** 2
-                        num_points += 1
                         self.gamma[g][r][d] = new_gamma
             if self.explorationBias:
-                for p in xrange(MAX_DOCS_PER_QUERY):
+                for p in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY)):
                     new_e = eFractions[p][0] / eFractions[p][1]
                     sum_square_displacement += (self.e[p] - new_e) ** 2
-                    num_points += 1
                     self.e[p] = new_e
-            if not PRETTY_LOG:
+            if not self.config.get('PRETTY_LOG', PRETTY_LOG):
                 sys.stderr.write('M\n')
-            rmsd = math.sqrt(sum_square_displacement / (num_points if TRAIN_FOR_METRIC else 1.0))
-            if PRETTY_LOG:
+            rmsd = math.sqrt(sum_square_displacement)
+            if self.config.get('PRETTY_LOG', PRETTY_LOG):
                 sys.stderr.write('%d..' % (iteration_count + 1))
             else:
-                print >>sys.stderr, 'Iteration: %d, RMSD: %.10f' % (iteration_count + 1, rmsd)
-        if PRETTY_LOG:
+                print >>sys.stderr, 'Iteration: %d, ERROR: %f' % (iteration_count + 1, rmsd)
+        if self.config.get('PRETTY_LOG', PRETTY_LOG):
             sys.stderr.write('\n')
         for q, intentWeights in self.queryIntentsWeights.iteritems():
             self.queryIntentsWeights[q] = sum(intentWeights) / len(intentWeights)
@@ -585,8 +606,9 @@ class UbmModel(ClickModel):
 
 
 class EbUbmModel(UbmModel):
-    def __init__(self, ignoreIntents=True, ignoreLayout=True):
-        UbmModel.__init__(self, ignoreIntents, ignoreLayout, explorationBias=True)
+    def __init__(self, ignoreIntents=True, ignoreLayout=True, config=None):
+        UbmModel.__init__(self, ignoreIntents, ignoreLayout, explorationBias=True,
+                         config=config)
 
 
 class DcmModel(ClickModel):
@@ -594,14 +616,18 @@ class DcmModel(ClickModel):
     gammaTypesNum = 4
 
     def train(self, sessions):
-        max_query_id = self.config.get('MAX_QUERY_ID', 100000)
+        max_query_id = self.config.get('MAX_QUERY_ID')
+        if max_query_id is None:
+            print >>sys.stderr, 'WARNING: no MAX_QUERY_ID specified for', self
+            max_query_id = 100000
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         urlRelFractions = dict((i, [defaultdict(lambda: [1.0, 1.0]) for q in xrange(max_query_id)]) for i in possibleIntents)
-        gammaFractions = [[[1.0, 1.0] for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_DOCS_PER_QUERY)]
+        gammaFractions = [[[1.0, 1.0] for g in xrange(self.gammaTypesNum)] \
+                for r in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))]
         for s in sessions:
             query = s.query
             layout = [False] * len(s.layout) if self.ignoreLayout else s.layout
-            lastClickedPos = MAX_DOCS_PER_QUERY - 1
+            lastClickedPos = self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY) - 1
             for k, c in enumerate(s.clicks):
                 if c != 0:
                     lastClickedPos = k
@@ -616,15 +642,18 @@ class DcmModel(ClickModel):
                             self.getGamma(gammaFractions[k], k, layout, i)[0] += intentWeights[i]
                     else:
                         urlRelFractions[i][query][u][0] += intentWeights[i]
-        self.urlRelevances = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(max_query_id)]) for i in possibleIntents)
-        self.gammas = [[0.5 for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_DOCS_PER_QUERY)]
+        self.urlRelevances = dict((i,
+                [defaultdict(lambda: self.config.get('DEFAULT_REL', DEFAULT_REL)) \
+                        for q in xrange(max_query_id)]) for i in possibleIntents)
+        self.gammas = [[0.5 for g in xrange(self.gammaTypesNum)] \
+                for r in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY))]
         for i in possibleIntents:
             for query, d in enumerate(urlRelFractions[i]):
                 if not d:
                     continue
                 for url, relFractions in d.iteritems():
                     self.urlRelevances[i][query][url] = relFractions[1] / (relFractions[1] + relFractions[0])
-        for k in xrange(MAX_DOCS_PER_QUERY):
+        for k in xrange(self.config.get('MAX_DOCS_PER_QUERY', MAX_DOCS_PER_QUERY)):
             for g in xrange(self.gammaTypesNum):
                 self.gammas[k][g] = gammaFractions[k][g][0] / (gammaFractions[k][g][0] + gammaFractions[k][g][1])
 
