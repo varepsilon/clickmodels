@@ -7,7 +7,6 @@ import sys
 import gc
 import json
 import math
-from abc import ABCMeta, abstractmethod
 from collections import defaultdict, namedtuple
 from datetime import datetime
 import random
@@ -25,27 +24,24 @@ MAX_QUERY_ID = 1000     # some initial value that will be updated by InputReader
 
 SessionItem = namedtuple('SessionItem', ['intentWeight', 'query', 'results', 'layout', 'clicks', 'extraclicks'])
 
-
+class NotImplementedError(Exception):
+    pass
 
 class ClickModel(object):
     """
         An abstract click model interface.
     """
 
-    __metaclass__ = ABCMeta
-
     def __init__(self, ignoreIntents=True, ignoreLayout=True):
         self.ignoreIntents = ignoreIntents
         self.ignoreLayout = ignoreLayout
 
-    @abstractmethod
     def train(self, sessions):
         """
             Trains the model.
         """
         pass
 
-    @abstractmethod
     def test(self, sessions, reportPositionPerplexity=True):
         """
             Evaluates the prediciton power of the click model for a given sessions.
@@ -128,32 +124,28 @@ class ClickModel(object):
         # Marginalize over possible intents: P(C_1, ..., C_N) = \sum_{i} P(C_1, ..., C_N | I=i) P(I=i)
         return math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents)) / N
 
-    @abstractmethod
     def get_model_relevances(self, session, intent=False):
         """
             Returns estimated relevance of each document in a given session
             based on a trained click model.
         """
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def predict_click_probs(self, session, intent=False):
         """
             Predicts click probabilities for a given session. Does not use session.clicks.
             This is a vector of P(C_k = 1 | E_k = 1) for different ranks $k$.
         """
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def predict_stop_probs(self, session, intent=False):
         """
             Predicts stop probabilities (after click) for each document in a session.
             This is often referred to as satisfaction probability.
             This is a vector of P(S_k = 1 | C_k = 1) for different ranks $k$.
         """
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def get_abandonment_prob(self, rank, intent=False):
         """
             Predicts probability of stopping without click after examining document at rank `rank`.
@@ -385,7 +377,6 @@ class DbnModel(ClickModel):
             relevances.append(a * s)
         return relevances
 
-    @abstractmethod
     def predict_click_probs(self, session, intent=False):
         """
             Predicts click probabilities for a given session. Does not use clicks.
@@ -396,7 +387,6 @@ class DbnModel(ClickModel):
             click_probs.append(a)
         return click_probs
 
-    @abstractmethod
     def predict_stop_probs(self, session, intent=False):
         """
             Predicts stop probabilities for each document in a session.
@@ -406,7 +396,6 @@ class DbnModel(ClickModel):
             s = self.urlRelevances[intent][session.query][result]['s']
             stop_probs.append(s)
         return stop_probs
-
 
 
 class SimplifiedDbnModel(DbnModel):
