@@ -99,31 +99,35 @@ class ClickModel(object):
         else:
             return logLikelihood / len(sessions), perplexity
 
-    def _get_click_probs(self, s, possibleIntents):
+    def _get_click_probs(self, s, possible_intents):
         """
             Returns click probabilities list for a given list of s.clicks.
             For each intent $i$ and each rank $k$ we have:
-            clickProbs[i][k] = P(C_1, ..., C_k | I=i)
+            click_probs[i][k-1] = P(C_1, ..., C_k | I=i)
         """
-        return dict((i, [0.5 ** (k + 1) for k in xrange(len(s.clicks))]) for i in possibleIntents)
+        click_probs = dict((i, [0.5 ** (k + 1) for k in xrange(len(s.clicks))]) for i in possible_intents)
+        return click_probs
 
     def get_loglikelihood(self, sessions):
         """
-            Returns the log-likelihood of the current model for given sessions.
+            Returns the average log-likelihood of the current model for given sessions.
+            This is a lightweight version of the self.test() method.
         """
-        loglikelihood = 0
-        for session in sessions:
-            log_click_probs = self.get_log_click_probs(session)
-            loglikelihood += sum(log_click_probs) / len(log_click_probs)
-        loglikelihood /= (len(sessions) if len(sessions) > 0 else 1.0)
-        return loglikelihood
+        return sum(self.get_log_click_probs(s) for s in sessions) / len(sessions)
 
     def get_log_click_probs(self, session):
         """
-            Returns the list of log-click probabilities for all URLs in a given session.
-            It assumes that there is only one intent.
+            Returns an average log-likelihood for a given session,
+            i.e. log-likelihood of all the click events, divided
+            by the number of documents in the session.
         """
-        return _get_click_probs(self, session, [1])
+        possibleIntents = [False] if self.ignoreIntents else [False, True]
+        intentWeight = {False: 1.0} if self.ignoreIntents else \
+                {False: 1 - session.intentWeight, True: session.intentWeight}
+        clickProbs = self._get_click_probs(s, possibleIntents)
+        N = min(len(session.clicks), MAX_DOCS_PER_QUERY)
+        # Marginalize over possible intents: P(C_1, ..., C_N) = \sum_{i} P(C_1, ..., C_N | I=i) P(I=i)
+        return math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents)) / N
 
     @abstractmethod
     def get_model_relevances(self, session):
