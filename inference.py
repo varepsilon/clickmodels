@@ -146,7 +146,7 @@ class ClickModel(object):
         """
         raise NotImplementedError
 
-    def get_abandonment_prob(self, rank, intent=False):
+    def get_abandonment_prob(self, rank, intent=False, layout=None):
         """
             Predicts probability of stopping without click after examining document at rank `rank`.
         """
@@ -174,7 +174,7 @@ class ClickModel(object):
                     break
             else:
                 random_stop_prob = random.uniform(0, 1)
-                if random_stop_prob < self.get_abandonment_prob(rank, intent):
+                if random_stop_prob < self.get_abandonment_prob(rank, intent, session.layout):
                     break
         return clicks
 
@@ -396,6 +396,13 @@ class DbnModel(ClickModel):
             s = self.urlRelevances[intent][session.query][result]['s']
             stop_probs.append(s)
         return stop_probs
+
+    def get_abandonment_prob(self, rank, intent=False, layout=None):
+        """
+            Predicts probability of stopping without click after examining document at rank `rank`.
+        """
+        return 1.0 - self.getGamma(self.gammas, rank, layout, intent)
+
 
 
 class SimplifiedDbnModel(DbnModel):
