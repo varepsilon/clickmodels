@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-#coding: utf-8
-
-# Input format: hash \t query \t region \t intent_probability \t urls list (json) \t layout (json) \t clicks (json)
-
 import sys
 import gc
 import json
@@ -11,28 +6,23 @@ from collections import defaultdict, namedtuple
 from datetime import datetime
 import random
 
-try:
-    from config import *
-except:
-    from config_sample import *
+from config_sample import *
 
-REL_PRIORS = (0.5, 0.5)
-
-DEFAULT_REL = REL_PRIORS[1] / sum(REL_PRIORS)
-
-MAX_QUERY_ID = 1000     # some initial value that will be updated by InputReader
 
 SessionItem = namedtuple('SessionItem', ['intentWeight', 'query', 'results', 'layout', 'clicks', 'extraclicks'])
+
 
 class NotImplementedError(Exception):
     pass
 
-class ClickModel(object):
+
+class ClickModel:
     """
         An abstract click model interface.
     """
 
-    def __init__(self, ignoreIntents=True, ignoreLayout=True):
+    def __init__(self, ignoreIntents=True, ignoreLayout=True, config=None):
+        self.config = config if config is not None else {}
         self.ignoreIntents = ignoreIntents
         self.ignoreLayout = ignoreLayout
 
@@ -180,14 +170,18 @@ class ClickModel(object):
 
 
 class DbnModel(ClickModel):
-    def __init__(self, gammas, ignoreIntents=True, ignoreLayout=True):
+    def __init__(self, gammas, ignoreIntents=True, ignoreLayout=True, config=None):
         self.gammas = gammas
-        ClickModel.__init__(self, ignoreIntents, ignoreLayout)
+        ClickModel.__init__(self, ignoreIntents, ignoreLayout, config)
 
     def train(self, sessions):
         possibleIntents = [False] if self.ignoreIntents else [False, True]
+        max_query_id = self.config.get('MAX_QUERY_ID', 100000)
         # intent -> query -> url -> (a_u, s_u)
-        self.urlRelevances = dict((i, [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
+        self.urlRelevances = dict((i,
+                [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) \
+                    for q in xrange(max_query_id)]) for i in possibleIntents
+        )
         # here we store distribution of posterior intent weights given train data
         self.queryIntentsWeights = defaultdict(lambda: [])
         # EM algorithm
@@ -197,7 +191,7 @@ class DbnModel(ClickModel):
         for iteration_count in xrange(MAX_ITERATIONS):
             # urlRelFractions[intent][query][url][r][1] --- coefficient before \log r
             # urlRelFractions[intent][query][url][r][0] --- coefficient before \log (1 - r)
-            urlRelFractions = dict((i, [defaultdict(lambda: {'a': [1.0, 1.0], 's': [1.0, 1.0]}) for q in xrange(MAX_QUERY_ID)]) for i in [False, True])
+            urlRelFractions = dict((i, [defaultdict(lambda: {'a': [1.0, 1.0], 's': [1.0, 1.0]}) for q in xrange(max_query_id)]) for i in [False, True])
             self.queryIntentsWeights = defaultdict(lambda: [])
             # E step
             for s in sessions:
@@ -412,7 +406,8 @@ class SimplifiedDbnModel(DbnModel):
         DbnModel.__init__(self, (1.0, 1.0, 1.0, 1.0), ignoreIntents, ignoreLayout)
 
     def train(self, sessions):
-        urlRelFractions = [defaultdict(lambda: {'a': [1.0, 1.0], 's': [1.0, 1.0]}) for q in xrange(MAX_QUERY_ID)]
+        max_query_id = self.config.get('MAX_QUERY_ID', 100000)
+        urlRelFractions = [defaultdict(lambda: {'a': [1.0, 1.0], 's': [1.0, 1.0]}) for q in xrange(max_query_id)]
         for s in sessions:
             query = s.query
             lastClickedPos = len(s.clicks) - 1
@@ -435,7 +430,7 @@ class SimplifiedDbnModel(DbnModel):
                     urlRelFractions[query][u]['a'][0] += 1
                 if QUERY_INDEPENDENT_PAGER:
                     query = tmpQuery
-        self.urlRelevances = dict((i, [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) for q in xrange(MAX_QUERY_ID)]) for i in [False])
+        self.urlRelevances = dict((i, [defaultdict(lambda: {'a': DEFAULT_REL, 's': DEFAULT_REL}) for q in xrange(max_query_id)]) for i in [False])
         for query, d in enumerate(urlRelFractions):
             if not d:
                 continue
@@ -448,14 +443,16 @@ class UbmModel(ClickModel):
 
     gammaTypesNum = 4
 
-    def __init__(self, ignoreIntents=True, ignoreLayout=True, explorationBias=False):
+    def __init__(self, ignoreIntents=True, ignoreLayout=True, explorationBias=False,
+                 config=None):
         self.explorationBias = explorationBias
-        ClickModel.__init__(self, ignoreIntents, ignoreLayout)
+        ClickModel.__init__(self, ignoreIntents, ignoreLayout, config)
 
     def train(self, sessions):
+        max_query_id = self.config.get('MAX_QUERY_ID', 100000)
         possibleIntents = [False] if self.ignoreIntents else [False, True]
         # alpha: intent -> query -> url -> "attractiveness probability"
-        self.alpha = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
+        self.alpha = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(max_query_id)]) for i in possibleIntents)
         # gamma: freshness of the current result: gammaType -> rank -> "distance from the last click" - 1 -> examination probability
         self.gamma = [[[0.5 for d in xrange(MAX_DOCS_PER_QUERY)] for r in xrange(MAX_DOCS_PER_QUERY)] for g in xrange(self.gammaTypesNum)]
         if self.explorationBias:
@@ -466,7 +463,7 @@ class UbmModel(ClickModel):
         for iteration_count in xrange(MAX_ITERATIONS):
             self.queryIntentsWeights = defaultdict(lambda: [])
             # not like in DBN! xxxFractions[0] is a numerator while xxxFraction[1] is a denominator
-            alphaFractions = dict((i, [defaultdict(lambda: [1.0, 2.0]) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
+            alphaFractions = dict((i, [defaultdict(lambda: [1.0, 2.0]) for q in xrange(max_query_id)]) for i in possibleIntents)
             gammaFractions = [[[[1.0, 2.0] for d in xrange(MAX_DOCS_PER_QUERY)] for r in xrange(MAX_DOCS_PER_QUERY)] for g in xrange(self.gammaTypesNum)]
             if self.explorationBias:
                 eFractions = [[1.0, 2.0] for p in xrange(MAX_DOCS_PER_QUERY)]
@@ -518,7 +515,7 @@ class UbmModel(ClickModel):
             sum_square_displacement = 0.0
             num_points = 0
             for i in possibleIntents:
-                for q in xrange(MAX_QUERY_ID):
+                for q in xrange(max_query_id):
                     for url, aF in alphaFractions[i][q].iteritems():
                         new_alpha = aF[0] / aF[1]
                         sum_square_displacement += (self.alpha[i][q][url] - new_alpha) ** 2
@@ -597,8 +594,9 @@ class DcmModel(ClickModel):
     gammaTypesNum = 4
 
     def train(self, sessions):
+        max_query_id = self.config.get('MAX_QUERY_ID', 100000)
         possibleIntents = [False] if self.ignoreIntents else [False, True]
-        urlRelFractions = dict((i, [defaultdict(lambda: [1.0, 1.0]) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
+        urlRelFractions = dict((i, [defaultdict(lambda: [1.0, 1.0]) for q in xrange(max_query_id)]) for i in possibleIntents)
         gammaFractions = [[[1.0, 1.0] for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_DOCS_PER_QUERY)]
         for s in sessions:
             query = s.query
@@ -618,7 +616,7 @@ class DcmModel(ClickModel):
                             self.getGamma(gammaFractions[k], k, layout, i)[0] += intentWeights[i]
                     else:
                         urlRelFractions[i][query][u][0] += intentWeights[i]
-        self.urlRelevances = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(MAX_QUERY_ID)]) for i in possibleIntents)
+        self.urlRelevances = dict((i, [defaultdict(lambda: DEFAULT_REL) for q in xrange(max_query_id)]) for i in possibleIntents)
         self.gammas = [[0.5 for g in xrange(self.gammaTypesNum)] for r in xrange(MAX_DOCS_PER_QUERY)]
         for i in possibleIntents:
             for query, d in enumerate(urlRelFractions[i]):
@@ -653,121 +651,4 @@ class DcmModel(ClickModel):
     @staticmethod
     def getGamma(gammas, k, layout, intent):
         return DbnModel.getGamma(gammas, k, layout, intent)
-
-
-class InputReader:
-    def __init__(self, discardNoClicks=True):
-        self.url_to_id = {}
-        self.query_to_id = {}
-        self.current_url_id = 1
-        self.current_query_id = 0
-        self.discardNoClicks = discardNoClicks
-
-    def __call__(self, f):
-        sessions = []
-        for line in f:
-            hash_digest, query, region, intentWeight, urls, layout, clicks = line.rstrip().split('\t')
-            urls, layout, clicks = map(json.loads, [urls, layout, clicks])
-            extra = {}
-            urlsObserved = 0
-            if EXTENDED_LOG_FORMAT:
-                maxLen = MAX_DOCS_PER_QUERY
-                if TRANSFORM_LOG:
-                    maxLen -= MAX_DOCS_PER_QUERY // SERP_SIZE
-                urls, _ = self.convertToList(urls, '', maxLen)
-                for u in urls:
-                    if u == '':
-                        break
-                    urlsObserved += 1
-                urls = urls[:urlsObserved]
-                layout, _ = self.convertToList(layout, False, urlsObserved)
-                clicks, extra = self.convertToList(clicks, 0, urlsObserved)
-            else:
-                urls = urls[:MAX_DOCS_PER_QUERY]
-                urlsObserved = len(urls)
-                layout = layout[:urlsObserved]
-                clicks = clicks[:urlsObserved]
-            if urlsObserved < MIN_DOCS_PER_QUERY:
-                continue
-            if self.discardNoClicks and not any(clicks):
-                continue
-            if float(intentWeight) > 1 or float(intentWeight) < 0:
-                continue
-            if (query, region) in self.query_to_id:
-                query_id = self.query_to_id[(query, region)]
-            else:
-                query_id = self.current_query_id
-                self.query_to_id[(query, region)] = self.current_query_id
-                self.current_query_id += 1
-            intentWeight = float(intentWeight)
-            # add fake G_{MAX_DOCS_PER_QUERY+1} to simplify gamma calculation:
-            layout.append(False)
-            url_ids = []
-            for u in urls:
-                if u in ['_404', 'STUPID', 'VIRUS', 'SPAM']:
-                    # convert Yandex-specific fields to standard ones
-                    assert TRAIN_FOR_METRIC
-                    u = 'IRRELEVANT'
-                if u.startswith('RELEVANT_'):
-                    # convert Yandex-specific fields to standard ones
-                    assert TRAIN_FOR_METRIC
-                    u = 'RELEVANT'
-                if u in self.url_to_id:
-                    if TRAIN_FOR_METRIC:
-                        url_ids.append(u)
-                    else:
-                        url_ids.append(self.url_to_id[u])
-                else:
-                    urlid = self.current_url_id
-                    if TRAIN_FOR_METRIC:
-                        url_ids.append(u)
-                    else:
-                        url_ids.append(urlid)
-                    self.url_to_id[u] = urlid
-                    self.current_url_id += 1
-            sessions.append(SessionItem(intentWeight, query_id, url_ids, layout, clicks, extra))
-        # FIXME: bad style
-        global MAX_QUERY_ID
-        MAX_QUERY_ID = self.current_query_id + 1
-        return sessions
-
-    @staticmethod
-    def convertToList(sparseDict, defaultElem=0, maxLen=MAX_DOCS_PER_QUERY):
-        """ Convert dict of the format {"0": doc0, "13": doc13} to the list of the length MAX_DOCS_PER_QUERY """
-        convertedList = [defaultElem] * maxLen
-        extra = {}
-        for k, v in sparseDict.iteritems():
-            try:
-                convertedList[int(k)] = v
-            except (ValueError, IndexError):
-                extra[k] = v
-        return convertedList, extra
-
-    @staticmethod
-    def mergeExtraToSessionItem(s):
-        """ Put pager click into the session item (presented as a fake URL) """
-        if s.extraclicks.get('TRANSFORMED', False):
-            return s
-        else:
-            newUrls = []
-            newLayout = []
-            newClicks = []
-            a = 0
-            while a + SERP_SIZE <= len(s.results):
-                b = a + SERP_SIZE
-                newUrls += s.results[a:b]
-                newLayout += s.layout[a:b]
-                newClicks += s.clicks[a:b]
-                # TODO: try different fake urls for different result pages (page_1, page_2, etc.)
-                newUrls.append('PAGER')
-                newLayout.append(False)
-                newClicks.append(1)
-                a = b
-            newClicks[-1] = 0 if a == len(s.results) else 1
-            newLayout.append(False)
-            if DEBUG:
-                assert len(newUrls) == len(newClicks)
-                assert len(newUrls) + 1 == len(newLayout), (len(newUrls), len(newLayout))
-                assert len(newUrls) < len(s.results) + MAX_DOCS_PER_QUERY / SERP_SIZE, (len(s.results), len(newUrls))
-            return SessionItem(s.intentWeight, s.query, newUrls, newLayout, newClicks, {'TRANSFORMED': True})
 

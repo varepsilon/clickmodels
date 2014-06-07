@@ -1,4 +1,18 @@
-from .inference import *
+#!/usr/bin/env python
+#coding: utf-8
+
+# Read from sys.stdin
+# Input format (see README.md for more details):
+# hash \t query \t region \t intent_probability \t url_list (json) \t layout (json) \t clicks (json)
+
+
+from clickmodels.inference import *
+from clickmodels.input_reader import InputReader
+
+try:
+    from config import *
+except:
+    from clickmodels.config_sample import *
 
 
 if __name__ == '__main__':
@@ -43,7 +57,6 @@ if __name__ == '__main__':
             testSessions = readInput(test_clicks_file)
     else:
         testSessions = sessions
-    del readInput       # needed to minimize memory consumption (see gc.collect() below)
 
     if TRANSFORM_LOG:
         assert EXTENDED_LOG_FORMAT
@@ -61,6 +74,11 @@ if __name__ == '__main__':
             #counts[i] += 1
     #print '\t'.join((str(x / cnt if cnt else x) for (x, cnt) in zip(clickProbs, counts)))
     #sys.exit(0)
+
+    config = {
+        'MAX_QUERY_ID': readInput.current_query_id + 1
+    }
+    del readInput       # needed to minimize memory consumption (see gc.collect() below)
 
     if 'Baseline' in USED_MODELS:
         baselineModel = ClickModel()

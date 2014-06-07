@@ -3,19 +3,22 @@
 import sys
 import glob
 
-from inference import *
-from bootstrap import bootstrap
+from clickmodels.inference import *
+from clickmodels.bootstrap import bootstrap
 
 
 def perpGain(r1, r2):
+    """ Perplexity gain of r2 over r1. """
     return (r1 - r2) / (r1 - 1)
 
 
 def llGain(r1, r2):
+    """ Log-likelihood gain of r2 over r1. """
     return (math.exp(r2 - r1) - 1)
 
 
 def avg(l):
+    """ Average of an iterable l. """
     s = 0
     n = 0
     for x in l:
@@ -42,7 +45,8 @@ MODEL_CONSTRUCTORS = {
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print >>sys.stderr, 'Usage: {0:s} directory_with_files'.format(sys.argv[0])
+        print >>sys.stderr, \
+            'Usage: {0:s} directory_with_log_files_for_different_days'.format(sys.argv[0])
         sys.exit(1)
     perplexityGains = dict((m, defaultdict(lambda: [])) for m in TESTED_MODEL_PAIRS)
     perplexityGainsPos = [dict((m, defaultdict(lambda: [])) for m in TESTED_MODEL_PAIRS) for pos in xrange(MAX_DOCS_PER_QUERY)]
