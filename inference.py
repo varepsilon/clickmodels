@@ -129,7 +129,7 @@ class ClickModel(object):
         return math.log(sum(clickProbs[i][N - 1] * intentWeight[i] for i in possibleIntents)) / N
 
     @abstractmethod
-    def get_model_relevances(self, session):
+    def get_model_relevances(self, session, intent=False):
         """
             Returns estimated relevance of each document in a given session
             based on a trained click model.
@@ -137,30 +137,42 @@ class ClickModel(object):
         pass
 
     @abstractmethod
-    def predict_click_probs(self, session):
+    def predict_click_probs(self, session, intent=False):
         """
-            Predicts click probabilities for a given session. Does not use clicks.
-        """
-        pass
-
-    @abstractmethod
-    def predict_stop_probs(self, session):
-        """
-            Predicts stop probabilities for each document in a session.
+            Predicts click probabilities for a given session. Does not use session.clicks.
+            This is a vector of P(C_k = 1 | E_k = 1) for different ranks $k$.
         """
         pass
 
     @abstractmethod
-    def get_abandonment_prob(self,rank):
-        return 0
+    def predict_stop_probs(self, session, intent=False):
+        """
+            Predicts stop probabilities (after click) for each document in a session.
+            This is often referred to as satisfaction probability.
+            This is a vector of P(S_k = 1 | C_k = 1) for different ranks $k$.
+        """
+        pass
+
+    @abstractmethod
+    def get_abandonment_prob(self, rank, intent=False):
+        """
+            Predicts probability of stopping without click after examining document at rank `rank`.
+        """
+        return 0.0
 
     def generate_clicks(self, session):
         """
-            Generates clicks for a given session.
+            Generates clicks for a given session, assuming cascade examination order.
         """
         clicks = [0] * len(session.results)
-        predicted_click_probs = self.predict_click_probs(session)
-        predicted_stop_probs = self.predict_stop_probs(session)
+        # First, randomly select user intent.
+        intent = False  # non-vertical intent by default
+        if not self.ignoreIntents:
+            random_intent_prob = random.uniforma(0, 1)
+            if random_intent_prob < session.intentWeight:
+                intent = True
+        predicted_click_probs = self.predict_click_probs(session, intent)
+        predicted_stop_probs = self.predict_stop_probs(session, intent)
         for rank, result in enumerate(session.results):
             random_click_prob = random.uniform(0, 1)
             clicks[rank] = 1 if random_click_prob < predicted_click_probs[rank] else 0
@@ -170,7 +182,7 @@ class ClickModel(object):
                     break
             else:
                 random_stop_prob = random.uniform(0, 1)
-                if random_stop_prob < self.get_abandonment_prob(rank):
+                if random_stop_prob < self.get_abandonment_prob(rank, intent):
                     break
         return clicks
 
@@ -355,40 +367,44 @@ class DbnModel(ClickModel):
         layout = [False] * len(s.layout) if self.ignoreLayout else s.layout
         return dict((i, self._getSessionEstimate(positionRelevances[i], layout, s.clicks, i)['clicks']) for i in possibleIntents)
 
-    def get_model_relevances(self, session):
+    def get_model_relevances(self, session, intent=False):
         """
             Returns estimated relevance of each document in a given session
             based on a trained click model.
+
+            You can make use of the fact that model trains different relevances
+            for different intents by specifying `intent` argument. If it is set
+            to False, simple web relevance is returned, if it is to True, then
+            vertical relevance is returned, i.e., how relevant each document
+            is to a vertical intent.
         """
         relevances = []
         for rank, result in enumerate(session.results):
-            a = self.urlRelevances[0][session.query][result]['a']
-            s = self.urlRelevances[0][session.query][result]['s']
-            relevance = a * s
-            relevances.append(relevance)
+            a = self.urlRelevances[intent][session.query][result]['a']
+            s = self.urlRelevances[intent][session.query][result]['s']
+            relevances.append(a * s)
         return relevances
 
     @abstractmethod
-    def predict_click_probs(self, session):
+    def predict_click_probs(self, session, intent=False):
         """
             Predicts click probabilities for a given session. Does not use clicks.
         """
-        click_probs= []
+        click_probs = []
         for rank, result in enumerate(session.results):
-            a = self.urlRelevances[0][session.query][result]['a']
+            a = self.urlRelevances[intent][session.query][result]['a']
             click_probs.append(a)
         return click_probs
 
     @abstractmethod
-    def predict_stop_probs(self, session):
+    def predict_stop_probs(self, session, intent=False):
         """
             Predicts stop probabilities for each document in a session.
         """
-        stop_probs= []
+        stop_probs = []
         for rank, result in enumerate(session.results):
-            a = self.urlRelevances[0][session.query][result]['a']
-            s = self.urlRelevances[0][session.query][result]['s']
-            stop_probs.append(a)
+            s = self.urlRelevances[intent][session.query][result]['s']
+            stop_probs.append(s)
         return stop_probs
 
 
