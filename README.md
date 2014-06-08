@@ -10,11 +10,21 @@ If you are looking for a general-purpose framework to work with probabilistic gr
 
 # Quick Start
 
- - `cp config_sample.py config.py`
+ - `cp clickmodels/config_sample.py config.py`
  - `vim config.py`
- - `./inference.py < data/click_log_sample.tsv 2>inference.log`
+ - `python bin/run_inference.py < data/click_log_sample.tsv 2>inference.log`
  
  More details about the config and input data formats below.
+ 
+ 
+# System-Wide Install
+If you wish, you can install the ClickModels core (parameter inference and click simulation) to a system-wide location:
+
+		sudo python setup.py install
+
+Uninstall:
+
+		sudo pip uninstall clickmodels
  
 
 # New!
@@ -53,43 +63,66 @@ If you need more data to experiment with you can use any publicly available data
 
 # Files
 ## README.md
-this file
+This file.
 
-## LICENSE, AUTHORS
- self explaining
+## LICENSE, AUTHORS, CHANES.txt
+ Self explaining.
  
-## makeGluedSERP.py 
-**{not used by other scripts}**
-Create html of the SERP containing fresh block item. This is used just to illustrate the notion of *presentation types* used by Intent-Aware models. Run as: `./makeGluedSERP.py < data/serp_sample.json`. Output is placed in `html` subdirectory. **WARNING:** all previously generated html files in this directory will be removed
+## setup.py
+Python package installation file: `python setup.py --help`
+
+## bin/
+Directory with the scripts.
+
+## clickmodels/
+Directory with the core code. This is the directory that gets installed by `setup.py`.
 
 ## data/
 `data/` directory contains an example of click log (see format description above) as well as two examples of result pages with fresh block included (see `makeGluedSERP.py` description above): `data/serp_sample.json` is used in an example above, while `data/serp_sample2.json` was used to create a picture in the paper [Chuklin, A. et al. 2013. Using Intent Information to Model User Behavior in Diversified Search. ECIR (2013).](http://ilps.science.uva.nl/biblio/using-intent-information-model-user-behavior-diversified-search)
 
-## bootstrap.py
-**{used by `testSignificance.py`}**
-Copyright © [Ernesto P. Adorio](http://adorio-research.org/wordpress/?p=12295): code we use to perform a bootstrap test
+## doc/
+Automaticaly generated documentation. Also available [online](http://htmlpreview.github.io/?https://raw.github.com/varepsilon/clickmodels/master/doc/html/index.html).
 
-## testSignificance.py
+## html/
+Directory with the CSS/JS files for `bin/generate_serp.py`; it outputs there a number of HTML files for you to examine to get an idea what kind of SERPs we address with the intent-aware click models.
+ 
+## bin/generate_serp.py 
+**{not used by the other, does not use other code}**
+Create html of the SERP containing fresh block item. This is used just to illustrate the notion of *presentation types* used by Intent-Aware models. Run as: `bin/generate_serp.py < data/serp_sample.json`. Output is placed in `html/` directory.
+
+**WARNING:** all previously generated html files in this directory will be removed
+
+
+## bin/compare_click_models.py
 **{not used by other scripts}**
 Script used to compare different models and output significance of the difference. The pair of models to compare is specified in the code by modifying `TESTED_MODEL_PAIRS` variable. Model pair is a text string which is mapped to the pair of functions returning model objects (see `MODEL_CONSTRUCTORS` dict for the mapping). E.g. `UBMvsDBN` is used to compare UBM model (`UbmModel()`) to the default DBN model (`DbnModel((0.9, 0.9, 0.9, 0.9))`). **NB**: we may have a list of models needed to be compared to each other. For this purpose the same notion of *pair* is abused. For instance, `MODEL_CONSTRUCTORS['EB_UBM']` contains 3 algorithms to be compared to each other: **UBM, EB_UBM, EB_UBM-IA**.
 
-- **Usage**: `./testSignificance.py directory_with_click_logs 2>run.log`
+- **Usage**: `bin/compare_click_models.py directory_with_click_logs 2>run.log`
 - **Input**: `directory_with_click_logs` — directory containing files with click logs. Each file is in the format described above. These files are then sorted alphabetically and split into pairs where first file is used for training, the second one is used for testing. For example, if the directory contains files `f01`, `f02`, `f03`, `f04` then `f02` will be used to test models trained using `f01`, `f04` will be used to test models trained using `f03` and so on. Two models are evaluated on the test set and their performances (Average Perplexity or Log Likelihood) are compared using appropriate formula (see `perpGain` and `llGain` functions respectively). **NB**: Multiple train and test files are needed to calculate confidence interval for the gains (`bootstrap.py` is used for this purpose).
 - **Output**: some progress output is printend to `sys.stderr` which might be useful for a long run. Finally the gains of one model over another is output in the following format:
  
 		UBM (0, 1) [-0.0115, 0.0659, 0.075, 0.0778, 0.0623, 0.0403, 0.0593, -0.040] (0.0095, 0.0662)		
 It first outputs the name of the "pair" `pairName` specified in the `TESTED_MODEL_PAIRS`, then pair of indeces `(i, j)` which mean that the model compared are `MODEL_CONSTRUCTORS[pairName][i]` and `MODEL_CONSTRUCTORS[pairName][j]` which is UBM and UBM-IA in our example. Next is the list of gains of model `j` over model `i` for each pair of the train/test logs (in our example we had 8 pairs of files under `directory_with_click_logs`). The next element is the confidence interval according to bootstrap test (with 95% confidence level and 1000 bootstrap samples). This line will be printed for all the "pairs" listed under `TESTED_MODEL_PAIRS` and for both Average Perplexity (PERPLEXITY) and Log Likelihood (LL). For perplexity measure also the gains for individual position (rank) are printed. Like this: `UBM POSITION PERPLEXITY GAINS: (0, 1) [[average_gain_for_pos1, confidence_interval_for_pos_1], …]`
 
-## inference.py
-This file contains implementation of all the click models, probabilistic inference and helper functions needed to work with them. This is the core of the codebase. More details about the classes/functions below.
+## bin/run_inference.py
+Run click model inference and evaluate the models:
 
-- **Usage**: `./inference.py < data/click_log_sample.tsv 2>inference.log`
+- **Usage**: `bin/run_inference.py < data/click_log_sample.tsv 2>inference.log`
 - **Input**: click log in the format described above (`sys.stdin`)
 - **Output** (assuming that `TRAIN_FOR_METRIC = False`): `ModelName (LogLikelihood, Perplexity)`
 
-## config.py
-**{used by `inference.py`}**
-This is the file where you should setup the code execution. The default settings for parameters are in `config_sample.py`.
+
+## clickmodels/inference.py
+This file contains implementation of all the click models, probabilistic inference and helper functions needed to work with them. This is the core of the codebase. More details about the classes/functions below.
+
+
+## clickmodels/bootstrap.py
+Copyright © [Ernesto P. Adorio](http://adorio-research.org/wordpress/?p=12295): code we use to perform a bootstrap test.
+
+
+## clickmodels/config_sample.py
+Copy this file to `config.py` and modify it; it will be used by `bin/run_inference.py` and `bin/compare_click_models.py`.
+This is the file with default settings for different parameters of the inference, input and output data.
 
 - `MAX_ITERATIONS` — maximum number of iterations in Expectation Maximization (EM) algorithm (applicable only for models using EM algorithm).
 - `DEBUG` — perform some additional tests when running algorithm (makes it slower)
@@ -102,11 +135,15 @@ This is the file where you should setup the code execution. The default settings
 - `QUERY_INDEPENDENT_PAGER` - used to switch between `SDBN(P)` / `SDBN(P-Q)`. Only used with `TRANSFORM_LOG = True`. 
 - `TRAIN_FOR_METRIC` – if `True` the model will be trained such that its parameters can be used in a metric (like [Chuklin, A. et al. 2013. Click Model-Based Information Retrieval Metrics. SIGIR (2013).](http://ilps.science.uva.nl/biblio/click-model-based-information-retrieval-metrics)). See the section below for more details.
 - `PRINT_EBU_STATS` — if `True` the parameters of the EBU metric will be printed first (*Yilmaz, E. et al. 2010. Expected browsing utility for web search evaluation. CIKM. (2010)*).
+- `DEFAULT_REL` - default (prior) relevance (attractiveness, satisfaction) parameter values used in click models like DBN or EBU.
+
+## clickmodels/input_reader.py
+A class used for reading input data in a click log format described above.
 
 ***
 
 # Class Hierarchy
-Also see epydoc-generated [documentation](http://htmlpreview.github.io/?https://raw.github.com/varepsilon/clickmodels/master/doc/html/inference-module.html).
+Also see epydoc-generated [documentation](http://htmlpreview.github.io/?https://raw.github.com/varepsilon/clickmodels/master/doc/html/index.html).
 ## Click Models
 ![Inheritance Diagram](https://raw.github.com/varepsilon/clickmodels/master/doc/html/class_hierarchy_for_clickmodel.gif)
 

@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>inference.SimplifiedRbpModel</title>
+  <title>clickmodels.bootstrap</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -16,7 +16,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -37,8 +37,8 @@
   <tr valign="top">
     <td width="100%">
       <span class="breadcrumbs">
-        <a href="inference-module.html">Module&nbsp;inference</a> ::
-        Class&nbsp;SimplifiedRbpModel
+        <a href="clickmodels-module.html">Package&nbsp;clickmodels</a> ::
+        Module&nbsp;bootstrap
       </span>
     </td>
     <td>
@@ -48,35 +48,30 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="inference.SimplifiedRbpModel-class.html"
+            >]&nbsp;|&nbsp;<a href="clickmodels.bootstrap-module.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
-<!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class SimplifiedRbpModel</h1><p class="nomargin-top"><span class="codelink"><a href="inference-pysrc.html#SimplifiedRbpModel">source&nbsp;code</a></span></p>
-<center>
-<center>  <map id="class_hierarchy_for_simplified_2" name="class_hierarchy_for_simplified_2">
-<area shape="rect" id="node1" href="inference.ClickModel-class.html" title="ClickModel" alt="" coords="31,6,113,31"/>
-<area shape="rect" id="node2" href="inference.RbpModel-class.html" title="RbpModel" alt="" coords="31,62,113,87"/>
-<area shape="rect" id="node3" href="inference.SimplifiedRbpModel-class.html" title="SimplifiedRbpModel" alt="" coords="5,118,139,143"/>
-</map>
-  <img src="class_hierarchy_for_simplified_2.gif" alt='' usemap="#class_hierarchy_for_simplified_2" ismap="ismap" class="graph-without-title" />
-</center>
-</center>
-<hr />
-<!-- ==================== INSTANCE METHODS ==================== -->
-<a name="section-InstanceMethods"></a>
+<!-- ==================== MODULE DESCRIPTION ==================== -->
+<h1 class="epydoc">Module bootstrap</h1><p class="nomargin-top"><span class="codelink"><a href="clickmodels.bootstrap-pysrc.html">source&nbsp;code</a></span></p>
+<p>File    bootstrap.py</p>
+  <p>Original Author  Ernesto P. Adorio, PhD. UPDEPP(U.P. at 
+  Clarkfield)</p>
+  <p>http://adorio-research.org/wordpress/?p=12295</p>
+
+<!-- ==================== FUNCTIONS ==================== -->
+<a name="section-Functions"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
   <td colspan="2" class="table-header">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="left"><span class="table-header">Functions</span></td>
         <td align="right" valign="top"
-         ><span class="options">[<a href="#section-InstanceMethods"
+         ><span class="options">[<a href="#section-Functions"
          class="privatelink" onclick="toggle_private();"
          >hide private</a>]</span></td>
       </tr>
@@ -89,12 +84,18 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="inference.SimplifiedRbpModel-class.html#train" class="summary-sig-name">train</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">sessions</span>)</span><br />
-      Set some instance attributes that will be further used in 
-      _getClickProbs function</td>
+          <td><span class="summary-sig"><a href="clickmodels.bootstrap-module.html#bootstrap" class="summary-sig-name">bootstrap</a>(<span class="summary-sig-arg">sample</span>,
+        <span class="summary-sig-arg">samplesize</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">nsamples</span>=<span class="summary-sig-default">1000</span>,
+        <span class="summary-sig-arg">statfunc</span>=<span class="summary-sig-default">&lt;function mean at 0x102c9df50&gt;</span>,
+        <span class="summary-sig-arg">conf</span>=<span class="summary-sig-default">0.95</span>)</span><br />
+      Arguments:
+    sample - input sample of values
+    samplesize - sample size of each generated sample
+    nsamples - number of samples to generate
+    statfunc- statistical function to apply to each generated sample.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#SimplifiedRbpModel.train">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.bootstrap-pysrc.html#bootstrap">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -102,55 +103,59 @@
       
     </td>
   </tr>
-  <tr>
-    <td colspan="2" class="summary">
-    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.RbpModel-class.html">RbpModel</a></code></b> (private):
-      <code><a href="inference.RbpModel-class.html#_getClickProbs" onclick="show_private();">_getClickProbs</a></code>
-      </p></div>
-    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.ClickModel-class.html">ClickModel</a></code></b>:
-      <code><a href="inference.ClickModel-class.html#__init__">__init__</a></code>,
-      <code><a href="inference.ClickModel-class.html#test">test</a></code>
-      </p>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="Test"></a><span class="summary-sig-name">Test</span>()</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="clickmodels.bootstrap-pysrc.html#Test">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
     </td>
   </tr>
 </table>
-<!-- ==================== STATIC METHODS ==================== -->
-<a name="section-StaticMethods"></a>
+<!-- ==================== VARIABLES ==================== -->
+<a name="section-Variables"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
   <td colspan="2" class="table-header">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <td align="left"><span class="table-header">Static Methods</span></td>
+        <td align="left"><span class="table-header">Variables</span></td>
         <td align="right" valign="top"
-         ><span class="options">[<a href="#section-StaticMethods"
+         ><span class="options">[<a href="#section-Variables"
          class="privatelink" onclick="toggle_private();"
          >hide private</a>]</span></td>
       </tr>
     </table>
   </td>
 </tr>
-  <tr>
-    <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.RbpModel-class.html">RbpModel</a></code></b>:
-      <code><a href="inference.RbpModel-class.html#getFunctions">getFunctions</a></code>,
-      <code><a href="inference.RbpModel-class.html#getWeightedFunctions">getWeightedFunctions</a></code>
-      </p>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="__package__"></a><span class="summary-name">__package__</span> = <code title="'clickmodels'"><code class="variable-quote">'</code><code class="variable-string">clickmodels</code><code class="variable-quote">'</code></code>
     </td>
   </tr>
 </table>
-<!-- ==================== METHOD DETAILS ==================== -->
-<a name="section-MethodDetails"></a>
+<!-- ==================== FUNCTION DETAILS ==================== -->
+<a name="section-FunctionDetails"></a>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
   <td colspan="2" class="table-header">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="left"><span class="table-header">Function Details</span></td>
         <td align="right" valign="top"
-         ><span class="options">[<a href="#section-MethodDetails"
+         ><span class="options">[<a href="#section-FunctionDetails"
          class="privatelink" onclick="toggle_private();"
          >hide private</a>]</span></td>
       </tr>
@@ -158,28 +163,36 @@
   </td>
 </tr>
 </table>
-<a name="train"></a>
+<a name="bootstrap"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">train</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">sessions</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">bootstrap</span>(<span class="sig-arg">sample</span>,
+        <span class="sig-arg">samplesize</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">nsamples</span>=<span class="sig-default">1000</span>,
+        <span class="sig-arg">statfunc</span>=<span class="sig-default">&lt;function mean at 0x102c9df50&gt;</span>,
+        <span class="sig-arg">conf</span>=<span class="sig-default">0.95</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="inference-pysrc.html#SimplifiedRbpModel.train">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="clickmodels.bootstrap-pysrc.html#bootstrap">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>Set some instance attributes that will be further used in 
-  _getClickProbs function</p>
+  <pre class="literalblock">
+
+Arguments:
+    sample - input sample of values
+    samplesize - sample size of each generated sample
+    nsamples - number of samples to generate
+    statfunc- statistical function to apply to each generated sample.
+
+Returns: bias (deviation of bootstrap from the sample) and confidence interal.
+
+</pre>
   <dl class="fields">
-    <dt>Overrides:
-        <a href="inference.ClickModel-class.html#train">ClickModel.train</a>
-        <dd><em class="note">(inherited documentation)</em></dd>
-    </dt>
   </dl>
 </td></tr></table>
 </div>
@@ -190,7 +203,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -210,7 +223,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Jan 30 20:50:57 2013
+    Generated by Epydoc 3.0.1 on Sun Jun  8 11:05:26 2014
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

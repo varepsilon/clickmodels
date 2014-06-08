@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-File    bootstrap.py
+    File    bootstrap.py
 
-Original Author  Ernesto P. Adorio, PhD.
-        UPDEPP(U.P. at Clarkfield)
+    Original Author  Ernesto P. Adorio, PhD.
+    UPDEPP(U.P. at Clarkfield)
 
-        http://adorio-research.org/wordpress/?p=12295
+    http://adorio-research.org/wordpress/?p=12295
 """
 
 import numpy as np
@@ -14,13 +14,13 @@ import random
 
 def bootstrap(sample, samplesize=None, nsamples=1000, statfunc=np.mean, conf=0.95):
     """
-    Arguments:
-       sample - input sample of values
-       samplesize - sample size of each generated sample
-       nsamples - number of samples to generate
-       statfunc- statistical function to apply to each generated sample.
+        Arguments:
+            sample - input sample of values
+            samplesize - sample size of each generated sample
+            nsamples - number of samples to generate
+            statfunc- statistical function to apply to each generated sample.
 
-    Returns: bias (deviation of bootstrap from the sample) and confidence interal.
+        Returns: bias (deviation of bootstrap from the sample) and confidence interal.
     """
     if samplesize is None:
         samplesize = len(sample)

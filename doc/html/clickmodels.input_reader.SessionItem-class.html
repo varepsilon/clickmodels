@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>inference.SessionItem</title>
+  <title>clickmodels.input_reader.SessionItem</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -16,7 +16,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -37,7 +37,8 @@
   <tr valign="top">
     <td width="100%">
       <span class="breadcrumbs">
-        <a href="inference-module.html">Module&nbsp;inference</a> ::
+        <a href="clickmodels-module.html">Package&nbsp;clickmodels</a> ::
+        <a href="clickmodels.input_reader-module.html">Module&nbsp;input_reader</a> ::
         Class&nbsp;SessionItem
       </span>
     </td>
@@ -48,19 +49,24 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="inference.SessionItem-class.html"
+            >]&nbsp;|&nbsp;<a href="clickmodels.input_reader.SessionItem-class.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class SessionItem</h1><p class="nomargin-top"><span class="codelink"><a href="inference-pysrc.html#SessionItem">source&nbsp;code</a></span></p>
+<h1 class="epydoc">Class SessionItem</h1><p class="nomargin-top"><span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem">source&nbsp;code</a></span></p>
 <center>
-
+<center>  <map id="class_hierarchy_for_sessionite" name="class_hierarchy_for_sessionite">
+<area shape="rect" id="node1" href="clickmodels.input_reader.SessionItem-class.html" title="SessionItem" alt="" coords="5,59,99,83"/>
+<area shape="rect" id="node2" href="javascript:void(0);" title="tuple" alt="" coords="27,5,76,29"/>
+</map>
+  <img src="class_hierarchy_for_sessionite.gif" alt='' usemap="#class_hierarchy_for_sessionite" ismap="ismap" class="graph-without-title" />
+</center>
 </center>
 <hr />
-<p>SessionItem(intentWeight, query, urls, layout, clicks, 
+<p>SessionItem(intentWeight, query, results, layout, clicks, 
   extraclicks)</p>
 
 <!-- ==================== INSTANCE METHODS ==================== -->
@@ -86,10 +92,10 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="inference.SessionItem-class.html#__getnewargs__" class="summary-sig-name">__getnewargs__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+          <td><span class="summary-sig"><a href="clickmodels.input_reader.SessionItem-class.html#__getnewargs__" class="summary-sig-name">__getnewargs__</a>(<span class="summary-sig-arg">self</span>)</span><br />
       Return self as a plain tuple.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#SessionItem.__getnewargs__">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem.__getnewargs__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -103,10 +109,10 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="inference.SessionItem-class.html#__repr__" class="summary-sig-name">__repr__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+          <td><span class="summary-sig"><a href="clickmodels.input_reader.SessionItem-class.html#__repr__" class="summary-sig-name">__repr__</a>(<span class="summary-sig-arg">self</span>)</span><br />
       Return a nicely formatted representation string</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#SessionItem.__repr__">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem.__repr__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -123,7 +129,7 @@
           <td><span class="summary-sig"><a name="_asdict"></a><span class="summary-sig-name">_asdict</span>(<span class="summary-sig-arg">self</span>)</span><br />
       Return a new OrderedDict which maps field names to their values</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#SessionItem._asdict">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem._asdict">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -142,7 +148,7 @@
       Return a new SessionItem object replacing specified fields with new 
       values</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#SessionItem._replace">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem._replace">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -211,11 +217,11 @@
         <tr>
           <td><span class="summary-sig"><a name="_make"></a><span class="summary-sig-name">_make</span>(<span class="summary-sig-arg">cls</span>,
         <span class="summary-sig-arg">iterable</span>,
-        <span class="summary-sig-arg">new</span>=<span class="summary-sig-default">&lt;built-in method __new__ of type object at 0x10c665b40&gt;</span>,
+        <span class="summary-sig-arg">new</span>=<span class="summary-sig-default">&lt;built-in method __new__ of type object at 0x102583b30&gt;</span>,
         <span class="summary-sig-arg">len</span>=<span class="summary-sig-default">&lt;built-in function len&gt;</span>)</span><br />
       Make a new SessionItem object from a sequence or iterable</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#SessionItem._make">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem._make">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -247,17 +253,17 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="inference.SessionItem-class.html#__new__" class="summary-sig-name">__new__</a>(<span class="summary-sig-arg">_cls</span>,
+          <td><span class="summary-sig"><a href="clickmodels.input_reader.SessionItem-class.html#__new__" class="summary-sig-name">__new__</a>(<span class="summary-sig-arg">_cls</span>,
         <span class="summary-sig-arg">intentWeight</span>,
         <span class="summary-sig-arg">query</span>,
-        <span class="summary-sig-arg">urls</span>,
+        <span class="summary-sig-arg">results</span>,
         <span class="summary-sig-arg">layout</span>,
         <span class="summary-sig-arg">clicks</span>,
         <span class="summary-sig-arg">extraclicks</span>)</span><br />
-      Create new instance of SessionItem(intentWeight, query, urls, layout,
-      clicks, extraclicks)</td>
+      Create new instance of SessionItem(intentWeight, query, results, 
+      layout, clicks, extraclicks)</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#SessionItem.__new__">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem.__new__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -287,7 +293,12 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="inference.SessionItem-class.html#_fields" class="summary-name" onclick="show_private();">_fields</a> = <code title="('intentWeight', 'query', 'urls', 'layout', 'clicks', 'extraclicks')"><code class="variable-group">(</code><code class="variable-quote">'</code><code class="variable-string">intentWeight</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">query</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">urls</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">layout</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">clicks</code><code class="variable-quote">'</code><code class="variable-ellipsis">...</code></code>
+        <a href="clickmodels.input_reader.SessionItem-class.html#_fields" class="summary-name" onclick="show_private();">_fields</a> = <code title="('intentWeight',
+ 'query',
+ 'results',
+ 'layout',
+ 'clicks',
+ 'extraclicks')"><code class="variable-group">(</code><code class="variable-quote">'</code><code class="variable-string">intentWeight</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">query</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">results</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">layout</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">clic</code><code class="variable-ellipsis">...</code></code>
     </td>
   </tr>
 </table>
@@ -312,7 +323,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="inference.SessionItem-class.html#clicks" class="summary-name">clicks</a><br />
+        <a href="clickmodels.input_reader.SessionItem-class.html#clicks" class="summary-name">clicks</a><br />
       Alias for field number 4
     </td>
   </tr>
@@ -320,7 +331,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="inference.SessionItem-class.html#extraclicks" class="summary-name">extraclicks</a><br />
+        <a href="clickmodels.input_reader.SessionItem-class.html#extraclicks" class="summary-name">extraclicks</a><br />
       Alias for field number 5
     </td>
   </tr>
@@ -328,7 +339,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="inference.SessionItem-class.html#intentWeight" class="summary-name">intentWeight</a><br />
+        <a href="clickmodels.input_reader.SessionItem-class.html#intentWeight" class="summary-name">intentWeight</a><br />
       Alias for field number 0
     </td>
   </tr>
@@ -336,7 +347,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="inference.SessionItem-class.html#layout" class="summary-name">layout</a><br />
+        <a href="clickmodels.input_reader.SessionItem-class.html#layout" class="summary-name">layout</a><br />
       Alias for field number 3
     </td>
   </tr>
@@ -344,7 +355,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="inference.SessionItem-class.html#query" class="summary-name">query</a><br />
+        <a href="clickmodels.input_reader.SessionItem-class.html#query" class="summary-name">query</a><br />
       Alias for field number 1
     </td>
   </tr>
@@ -352,7 +363,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="inference.SessionItem-class.html#urls" class="summary-name">urls</a><br />
+        <a href="clickmodels.input_reader.SessionItem-class.html#results" class="summary-name">results</a><br />
       Alias for field number 2
     </td>
   </tr>
@@ -392,7 +403,7 @@
   <h3 class="epydoc"><span class="sig"><span class="sig-name">__getnewargs__</span>(<span class="sig-arg">self</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="inference-pysrc.html#SessionItem.__getnewargs__">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem.__getnewargs__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
@@ -414,19 +425,19 @@
   <h3 class="epydoc"><span class="sig"><span class="sig-name">__new__</span>(<span class="sig-arg">_cls</span>,
         <span class="sig-arg">intentWeight</span>,
         <span class="sig-arg">query</span>,
-        <span class="sig-arg">urls</span>,
+        <span class="sig-arg">results</span>,
         <span class="sig-arg">layout</span>,
         <span class="sig-arg">clicks</span>,
         <span class="sig-arg">extraclicks</span>)</span>
     <br /><em class="fname">Static Method</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="inference-pysrc.html#SessionItem.__new__">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem.__new__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>Create new instance of SessionItem(intentWeight, query, urls, layout, 
-  clicks, extraclicks)</p>
+  <p>Create new instance of SessionItem(intentWeight, query, results, 
+  layout, clicks, extraclicks)</p>
   <dl class="fields">
     <dt>Returns: a new object with type S, a subtype of T</dt>
     <dt>Overrides:
@@ -446,7 +457,7 @@
     <br /><em class="fname">(Representation operator)</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="inference-pysrc.html#SessionItem.__repr__">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="clickmodels.input_reader-pysrc.html#SessionItem.__repr__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
@@ -489,7 +500,12 @@
   <dl class="fields">
     <dt>Value:</dt>
       <dd><table><tr><td><pre class="variable">
-<code class="variable-group">(</code><code class="variable-quote">'</code><code class="variable-string">intentWeight</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">query</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">urls</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">layout</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">clicks</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">extraclicks</code><code class="variable-quote">'</code><code class="variable-group">)</code>
+<code class="variable-group">(</code><code class="variable-quote">'</code><code class="variable-string">intentWeight</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">query</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">results</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">layout</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">clicks</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">extraclicks</code><code class="variable-quote">'</code><code class="variable-group">)</code>
 </pre></td></tr></table>
 </dd>
   </dl>
@@ -524,7 +540,7 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x10ccceb50&gt;
+&lt;operator.itemgetter object at 0x102af5d10&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -541,7 +557,7 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x10ccceb90&gt;
+&lt;operator.itemgetter object at 0x102af5d50&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -558,7 +574,7 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x10cccea50&gt;
+&lt;operator.itemgetter object at 0x102af5c10&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -575,7 +591,7 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x10ccceb10&gt;
+&lt;operator.itemgetter object at 0x102af5cd0&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -592,24 +608,24 @@
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x10cccea90&gt;
+&lt;operator.itemgetter object at 0x102af5c50&gt;
 </pre></td></tr></table>
 
     </dd>
   </dl>
 </td></tr></table>
 </div>
-<a name="urls"></a>
+<a name="results"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
-  <h3 class="epydoc">urls</h3>
+  <h3 class="epydoc">results</h3>
   <p>Alias for field number 2</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><table><tr><td><pre class="variable">
-&lt;operator.itemgetter object at 0x10cccead0&gt;
+&lt;operator.itemgetter object at 0x102af5c90&gt;
 </pre></td></tr></table>
 
     </dd>
@@ -623,7 +639,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -643,7 +659,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Aug  8 10:57:37 2013
+    Generated by Epydoc 3.0.1 on Sun Jun  8 11:05:26 2014
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

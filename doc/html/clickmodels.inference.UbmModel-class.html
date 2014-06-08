@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>inference.RbpModel</title>
+  <title>clickmodels.inference.UbmModel</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -16,7 +16,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -37,8 +37,9 @@
   <tr valign="top">
     <td width="100%">
       <span class="breadcrumbs">
-        <a href="inference-module.html">Module&nbsp;inference</a> ::
-        Class&nbsp;RbpModel
+        <a href="clickmodels-module.html">Package&nbsp;clickmodels</a> ::
+        <a href="clickmodels.inference-module.html">Module&nbsp;inference</a> ::
+        Class&nbsp;UbmModel
       </span>
     </td>
     <td>
@@ -48,21 +49,21 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="inference.RbpModel-class.html"
+            >]&nbsp;|&nbsp;<a href="clickmodels.inference.UbmModel-class.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class RbpModel</h1><p class="nomargin-top"><span class="codelink"><a href="inference-pysrc.html#RbpModel">source&nbsp;code</a></span></p>
+<h1 class="epydoc">Class UbmModel</h1><p class="nomargin-top"><span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel">source&nbsp;code</a></span></p>
 <center>
-<center>  <map id="class_hierarchy_for_rbpmodel" name="class_hierarchy_for_rbpmodel">
-<area shape="rect" id="node1" href="inference.ClickModel-class.html" title="ClickModel" alt="" coords="31,6,113,31"/>
-<area shape="rect" id="node2" href="inference.RbpModel-class.html" title="RbpModel" alt="" coords="31,62,113,87"/>
-<area shape="rect" id="node3" href="inference.SimplifiedRbpModel-class.html" title="SimplifiedRbpModel" alt="" coords="5,118,139,143"/>
+<center>  <map id="class_hierarchy_for_ubmmodel" name="class_hierarchy_for_ubmmodel">
+<area shape="rect" id="node1" href="clickmodels.inference.ClickModel-class.html" title="ClickModel" alt="" coords="13,5,99,29"/>
+<area shape="rect" id="node3" href="clickmodels.inference.UbmModel-class.html" title="UbmModel" alt="" coords="13,59,99,83"/>
+<area shape="rect" id="node2" href="clickmodels.inference.EbUbmModel-class.html" title="EbUbmModel" alt="" coords="5,112,107,136"/>
 </map>
-  <img src="class_hierarchy_for_rbpmodel.gif" alt='' usemap="#class_hierarchy_for_rbpmodel" ismap="ismap" class="graph-without-title" />
+  <img src="class_hierarchy_for_ubmmodel.gif" alt='' usemap="#class_hierarchy_for_ubmmodel" ismap="ismap" class="graph-without-title" />
 </center>
 </center>
 <hr />
@@ -89,12 +90,31 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="inference.RbpModel-class.html#train" class="summary-sig-name">train</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">sessions</span>)</span><br />
-      Set some instance attributes that will be further used in 
-      _getClickProbs function</td>
+          <td><span class="summary-sig"><a href="clickmodels.inference.UbmModel-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">ignoreIntents</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">ignoreLayout</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">explorationBias</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">config</span>=<span class="summary-sig-default">None</span>)</span></td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#RbpModel.train">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="clickmodels.inference.UbmModel-class.html#train" class="summary-sig-name">train</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">sessions</span>)</span><br />
+      Trains the model.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel.train">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -108,12 +128,29 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="inference.RbpModel-class.html#_getClickProbs" class="summary-sig-name" onclick="show_private();">_getClickProbs</a>(<span class="summary-sig-arg">self</span>,
+          <td><span class="summary-sig"><a name="_getSessionProb"></a><span class="summary-sig-name">_getSessionProb</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">s</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel._getSessionProb">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="clickmodels.inference.UbmModel-class.html#_get_click_probs" class="summary-sig-name" onclick="show_private();">_get_click_probs</a>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">s</span>,
         <span class="summary-sig-arg">possibleIntents</span>)</span><br />
       Returns clickProbs list clickProbs[i][k] = P(C_1, ..., C_k | I=i)</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#RbpModel._getClickProbs">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel._get_click_probs">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -123,9 +160,15 @@
   </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.ClickModel-class.html">ClickModel</a></code></b>:
-      <code><a href="inference.ClickModel-class.html#__init__">__init__</a></code>,
-      <code><a href="inference.ClickModel-class.html#test">test</a></code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="clickmodels.inference.ClickModel-class.html">ClickModel</a></code></b>:
+      <code><a href="clickmodels.inference.ClickModel-class.html#generate_clicks">generate_clicks</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#get_abandonment_prob">get_abandonment_prob</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#get_log_click_probs">get_log_click_probs</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#get_loglikelihood">get_loglikelihood</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#get_model_relevances">get_model_relevances</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#predict_click_probs">predict_click_probs</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#predict_stop_probs">predict_stop_probs</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#test">test</a></code>
       </p>
     </td>
   </tr>
@@ -153,13 +196,13 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="getFunctions"></a><span class="summary-sig-name">getFunctions</span>(<span class="summary-sig-arg">layout</span>,
-        <span class="summary-sig-arg">intent</span>=<span class="summary-sig-default">False</span>)</span><br />
-      layout should be of form [True, False, True, True] where 
-      &quot;True&quot; means that presentation type is set to 
-      &quot;fresh&quot;.</td>
+          <td><span class="summary-sig"><a name="getGamma"></a><span class="summary-sig-name">getGamma</span>(<span class="summary-sig-arg">gammas</span>,
+        <span class="summary-sig-arg">k</span>,
+        <span class="summary-sig-arg">prevClick</span>,
+        <span class="summary-sig-arg">layout</span>,
+        <span class="summary-sig-arg">intent</span>)</span></td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#RbpModel.getFunctions">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel.getGamma">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -167,21 +210,29 @@
       
     </td>
   </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="getWeightedFunctions"></a><span class="summary-sig-name">getWeightedFunctions</span>(<span class="summary-sig-arg">intentProb</span>,
-        <span class="summary-sig-arg">layout</span>)</span></td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#RbpModel.getWeightedFunctions">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
+        <a name="gammaTypesNum"></a><span class="summary-name">gammaTypesNum</span> = <code title="4">4</code>
     </td>
   </tr>
 </table>
@@ -203,6 +254,33 @@
   </td>
 </tr>
 </table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">ignoreIntents</span>=<span class="sig-default">True</span>,
+        <span class="sig-arg">ignoreLayout</span>=<span class="sig-default">True</span>,
+        <span class="sig-arg">explorationBias</span>=<span class="sig-default">False</span>,
+        <span class="sig-arg">config</span>=<span class="sig-default">None</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  
+  <dl class="fields">
+    <dt>Overrides:
+        <a href="clickmodels.inference.ClickModel-class.html#__init__">ClickModel.__init__</a>
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
 <a name="train"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -214,40 +292,39 @@
         <span class="sig-arg">sessions</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="inference-pysrc.html#RbpModel.train">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel.train">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>Set some instance attributes that will be further used in 
-  _getClickProbs function</p>
+  <p>Trains the model.</p>
   <dl class="fields">
     <dt>Overrides:
-        <a href="inference.ClickModel-class.html#train">ClickModel.train</a>
+        <a href="clickmodels.inference.ClickModel-class.html#train">ClickModel.train</a>
         <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
 </td></tr></table>
 </div>
-<a name="_getClickProbs"></a>
+<a name="_get_click_probs"></a>
 <div class="private">
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">_getClickProbs</span>(<span class="sig-arg">self</span>,
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">_get_click_probs</span>(<span class="sig-arg">self</span>,
         <span class="sig-arg">s</span>,
         <span class="sig-arg">possibleIntents</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="inference-pysrc.html#RbpModel._getClickProbs">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="clickmodels.inference-pysrc.html#UbmModel._get_click_probs">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
   <p>Returns clickProbs list clickProbs[i][k] = P(C_1, ..., C_k | I=i)</p>
   <dl class="fields">
     <dt>Overrides:
-        <a href="inference.ClickModel-class.html#_getClickProbs" onclick="show_private();">ClickModel._getClickProbs</a>
+        <a href="clickmodels.inference.ClickModel-class.html#_get_click_probs" onclick="show_private();">ClickModel._get_click_probs</a>
     </dt>
   </dl>
 </td></tr></table>
@@ -259,7 +336,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -279,7 +356,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Jan 30 20:50:57 2013
+    Generated by Epydoc 3.0.1 on Sun Jun  8 11:05:26 2014
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

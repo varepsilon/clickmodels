@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>inference.EbUbmModel</title>
+  <title>clickmodels.inference.EbUbmModel</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -16,7 +16,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -37,7 +37,8 @@
   <tr valign="top">
     <td width="100%">
       <span class="breadcrumbs">
-        <a href="inference-module.html">Module&nbsp;inference</a> ::
+        <a href="clickmodels-module.html">Package&nbsp;clickmodels</a> ::
+        <a href="clickmodels.inference-module.html">Module&nbsp;inference</a> ::
         Class&nbsp;EbUbmModel
       </span>
     </td>
@@ -48,16 +49,22 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="inference.EbUbmModel-class.html"
+            >]&nbsp;|&nbsp;<a href="clickmodels.inference.EbUbmModel-class.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class EbUbmModel</h1><p class="nomargin-top"><span class="codelink"><a href="inference-pysrc.html#EbUbmModel">source&nbsp;code</a></span></p>
+<h1 class="epydoc">Class EbUbmModel</h1><p class="nomargin-top"><span class="codelink"><a href="clickmodels.inference-pysrc.html#EbUbmModel">source&nbsp;code</a></span></p>
 <center>
-
+<center>  <map id="class_hierarchy_for_ebubmmodel" name="class_hierarchy_for_ebubmmodel">
+<area shape="rect" id="node1" href="clickmodels.inference.ClickModel-class.html" title="ClickModel" alt="" coords="13,5,99,29"/>
+<area shape="rect" id="node3" href="clickmodels.inference.UbmModel-class.html" title="UbmModel" alt="" coords="13,59,99,83"/>
+<area shape="rect" id="node2" href="clickmodels.inference.EbUbmModel-class.html" title="EbUbmModel" alt="" coords="5,112,107,136"/>
+</map>
+  <img src="class_hierarchy_for_ebubmmodel.gif" alt='' usemap="#class_hierarchy_for_ebubmmodel" ismap="ismap" class="graph-without-title" />
+</center>
 </center>
 <hr />
 <!-- ==================== INSTANCE METHODS ==================== -->
@@ -83,11 +90,12 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="inference.EbUbmModel-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+          <td><span class="summary-sig"><a href="clickmodels.inference.EbUbmModel-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">ignoreIntents</span>=<span class="summary-sig-default">True</span>,
-        <span class="summary-sig-arg">ignoreLayout</span>=<span class="summary-sig-default">True</span>)</span></td>
+        <span class="summary-sig-arg">ignoreLayout</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">config</span>=<span class="summary-sig-default">None</span>)</span></td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#EbUbmModel.__init__">source&nbsp;code</a></span>
+            <span class="codelink"><a href="clickmodels.inference-pysrc.html#EbUbmModel.__init__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -97,15 +105,22 @@
   </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.UbmModel-class.html">UbmModel</a></code></b>:
-      <code><a href="inference.UbmModel-class.html#train">train</a></code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="clickmodels.inference.UbmModel-class.html">UbmModel</a></code></b>:
+      <code><a href="clickmodels.inference.UbmModel-class.html#train">train</a></code>
       </p>
-    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.UbmModel-class.html">UbmModel</a></code></b> (private):
-      <code><a href="inference.UbmModel-class.html#_getClickProbs" onclick="show_private();">_getClickProbs</a></code>,
-      <code><a href="inference.UbmModel-class.html#_getSessionProb" onclick="show_private();">_getSessionProb</a></code>
+    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="clickmodels.inference.UbmModel-class.html">UbmModel</a></code></b> (private):
+      <code><a href="clickmodels.inference.UbmModel-class.html#_getSessionProb" onclick="show_private();">_getSessionProb</a></code>,
+      <code><a href="clickmodels.inference.UbmModel-class.html#_get_click_probs" onclick="show_private();">_get_click_probs</a></code>
       </p></div>
-    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.ClickModel-class.html">ClickModel</a></code></b>:
-      <code><a href="inference.ClickModel-class.html#test">test</a></code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="clickmodels.inference.ClickModel-class.html">ClickModel</a></code></b>:
+      <code><a href="clickmodels.inference.ClickModel-class.html#generate_clicks">generate_clicks</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#get_abandonment_prob">get_abandonment_prob</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#get_log_click_probs">get_log_click_probs</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#get_loglikelihood">get_loglikelihood</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#get_model_relevances">get_model_relevances</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#predict_click_probs">predict_click_probs</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#predict_stop_probs">predict_stop_probs</a></code>,
+      <code><a href="clickmodels.inference.ClickModel-class.html#test">test</a></code>
       </p>
     </td>
   </tr>
@@ -129,8 +144,8 @@
 </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.UbmModel-class.html">UbmModel</a></code></b>:
-      <code><a href="inference.UbmModel-class.html#getGamma">getGamma</a></code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="clickmodels.inference.UbmModel-class.html">UbmModel</a></code></b>:
+      <code><a href="clickmodels.inference.UbmModel-class.html#getGamma">getGamma</a></code>
       </p>
     </td>
   </tr>
@@ -154,8 +169,8 @@
 </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="inference.UbmModel-class.html">UbmModel</a></code></b>:
-      <code><a href="inference.UbmModel-class.html#gammaTypesNum">gammaTypesNum</a></code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="clickmodels.inference.UbmModel-class.html">UbmModel</a></code></b>:
+      <code><a href="clickmodels.inference.UbmModel-class.html#gammaTypesNum">gammaTypesNum</a></code>
       </p>
     </td>
   </tr>
@@ -187,18 +202,19 @@
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
         <span class="sig-arg">ignoreIntents</span>=<span class="sig-default">True</span>,
-        <span class="sig-arg">ignoreLayout</span>=<span class="sig-default">True</span>)</span>
+        <span class="sig-arg">ignoreLayout</span>=<span class="sig-default">True</span>,
+        <span class="sig-arg">config</span>=<span class="sig-default">None</span>)</span>
     <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="inference-pysrc.html#EbUbmModel.__init__">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="clickmodels.inference-pysrc.html#EbUbmModel.__init__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
   
   <dl class="fields">
     <dt>Overrides:
-        <a href="inference.ClickModel-class.html#__init__">ClickModel.__init__</a>
+        <a href="clickmodels.inference.ClickModel-class.html#__init__">ClickModel.__init__</a>
     </dt>
   </dl>
 </td></tr></table>
@@ -210,7 +226,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -230,7 +246,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Aug  8 10:57:37 2013
+    Generated by Epydoc 3.0.1 on Sun Jun  8 11:05:26 2014
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

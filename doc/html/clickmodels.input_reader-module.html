@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>inference.ClickModel</title>
+  <title>clickmodels.input_reader</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -16,7 +16,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -37,8 +37,8 @@
   <tr valign="top">
     <td width="100%">
       <span class="breadcrumbs">
-        <a href="inference-module.html">Module&nbsp;inference</a> ::
-        Class&nbsp;ClickModel
+        <a href="clickmodels-module.html">Package&nbsp;clickmodels</a> ::
+        Module&nbsp;input_reader
       </span>
     </td>
     <td>
@@ -48,29 +48,25 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="inference.ClickModel-class.html"
+            >]&nbsp;|&nbsp;<a href="clickmodels.input_reader-module.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
-<!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class ClickModel</h1><p class="nomargin-top"><span class="codelink"><a href="inference-pysrc.html#ClickModel">source&nbsp;code</a></span></p>
-<center>
-
-</center>
-<hr />
-<!-- ==================== INSTANCE METHODS ==================== -->
-<a name="section-InstanceMethods"></a>
+<!-- ==================== MODULE DESCRIPTION ==================== -->
+<h1 class="epydoc">Module input_reader</h1><p class="nomargin-top"><span class="codelink"><a href="clickmodels.input_reader-pysrc.html">source&nbsp;code</a></span></p>
+<!-- ==================== CLASSES ==================== -->
+<a name="section-Classes"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
   <td colspan="2" class="table-header">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="left"><span class="table-header">Classes</span></td>
         <td align="right" valign="top"
-         ><span class="options">[<a href="#section-InstanceMethods"
+         ><span class="options">[<a href="#section-Classes"
          class="privatelink" onclick="toggle_private();"
          >hide private</a>]</span></td>
       </tr>
@@ -81,74 +77,48 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="__init__"></a><span class="summary-sig-name">__init__</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">ignoreIntents</span>=<span class="summary-sig-default">True</span>,
-        <span class="summary-sig-arg">ignoreLayout</span>=<span class="summary-sig-default">True</span>)</span></td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#ClickModel.__init__">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
+        <a href="clickmodels.input_reader.SessionItem-class.html" class="summary-name">SessionItem</a><br />
+      SessionItem(intentWeight, query, results, layout, clicks, 
+        extraclicks)
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="train"></a><span class="summary-sig-name">train</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">sessions</span>)</span><br />
-      Set some attributes that will be further used in _getClickProbs 
-      function</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#ClickModel.train">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
+        <a href="clickmodels.input_reader.InputReader-class.html" class="summary-name">InputReader</a>
+    </td>
+  </tr>
+</table>
+<!-- ==================== VARIABLES ==================== -->
+<a name="section-Variables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Variables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="DEBUG"></a><span class="summary-name">DEBUG</span> = <code title="False">False</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="test"></a><span class="summary-sig-name">test</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">sessions</span>,
-        <span class="summary-sig-arg">reportPositionPerplexity</span>=<span class="summary-sig-default">True</span>)</span></td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#ClickModel.test">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="_getClickProbs"></a><span class="summary-sig-name">_getClickProbs</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">s</span>,
-        <span class="summary-sig-arg">possibleIntents</span>)</span><br />
-      Returns clickProbs list clickProbs[i][k] = P(C_1, ..., C_k | I=i)</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="inference-pysrc.html#ClickModel._getClickProbs">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
+        <a name="__package__"></a><span class="summary-name">__package__</span> = <code title="'clickmodels'"><code class="variable-quote">'</code><code class="variable-string">clickmodels</code><code class="variable-quote">'</code></code>
     </td>
   </tr>
 </table>
@@ -158,7 +128,7 @@
   <tr valign="middle">
   <!-- Home link -->
       <th>&nbsp;&nbsp;&nbsp;<a
-        href="inference-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+        href="clickmodels-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -178,7 +148,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Aug  8 10:57:37 2013
+    Generated by Epydoc 3.0.1 on Sun Jun  8 11:05:26 2014
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
