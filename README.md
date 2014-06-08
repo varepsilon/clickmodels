@@ -144,8 +144,10 @@ A class used for reading input data in a click log format described above.
 
 # Class Hierarchy
 Also see epydoc-generated [documentation](http://htmlpreview.github.io/?https://raw.github.com/varepsilon/clickmodels/master/doc/html/index.html).
+
 ## Click Models
-![Inheritance Diagram](https://raw.github.com/varepsilon/clickmodels/master/doc/html/class_hierarchy_for_clickmodel.gif)
+
+![](https://raw.github.com/varepsilon/clickmodels/master/doc/html/class_hierarchy_for_clickmodel.gif)
 
 The base class for all the click models is the class called `ClickModel`. In order to define a new click model you should create a clas inherited from it and re-define methods `train` and `_getClickProbs`. 
 
