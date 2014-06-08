@@ -35,10 +35,6 @@ def avg(l):
 
 TESTED_MODEL_PAIRS = ['UBM', 'EB_UBM', 'UBMvsDBN']
 
-if 'RBP' in TESTED_MODEL_PAIRS:
-    import scipy
-    import scipy.optimize
-
 MODEL_CONSTRUCTORS = {
     'DBN': (lambda config: DbnModel((0.9, 0.9, 0.9, 0.9), config=config),
             lambda config: DbnModel((1.0, 0.9, 1.0, 0.9),
@@ -53,8 +49,6 @@ MODEL_CONSTRUCTORS = {
                                          config=config)),
     'DCM': (lambda config: DcmModel(config=config),
             lambda config: DcmModel(ignoreIntents=False, ignoreLayout=False, config=config)),
-    'RBP': (lambda config: SimplifiedRbpModel(config=config),
-            lambda: RbpModel(ignoreIntents=False, ignoreLayout=False, config=config))
 }
 
 if __name__ == '__main__':
