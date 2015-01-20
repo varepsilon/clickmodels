@@ -2,12 +2,13 @@ from distutils.core import setup
 import glob
 
 from setuptools import setup
-try:
-    from pypandoc import convert
-    read_md = lambda f: convert(f, 'rst')
-except ImportError:
-    print('Warning: pypandoc module not found, could not convert Markdown to RST')
-    read_md = lambda f: open(f, 'r').read()
+
+def read_md(file_name):
+    try:
+        from pypandoc import convert
+        return convert(file_name, 'rest')
+    except:
+        return ''
 
 setup(
     name='clickmodels',
