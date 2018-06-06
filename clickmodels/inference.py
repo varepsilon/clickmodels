@@ -305,8 +305,12 @@ class DbnModel(ClickModel):
         return alpha, beta
 
     def _getSessionEstimate(self, positionRelevances, layout, clicks, intent):
-        # Returns {'a': P(A_k | I, C, G), 's': P(S_k | I, C, G), 'C': P(C | I, G), 'clicks': P(C_k | C_1, ..., C_{k-1}, I, G)} as a dict
-        # sessionEstimate[True]['a'][k] = P(A_k = 1 | I = 'Fresh', C, G), probability of A_k = 0 can be calculated as 1 - p
+        # Returns a dict that represents the following:
+        # {'a': P(A_k | I, C, G),
+        #  's': P(S_k | I, C, G),
+        #  'C': P(C | I, G),
+        #  'clicks': P(C_k | C_1, ..., C_{k-1}, I, G)} 
+        # E.g., sessionEstimate['a'][k] = P(A_k = 1 | I = i, C, G).
         N = len(clicks)
         if self.config.get('DEBUG', DEBUG):
             assert N + 1 == len(layout)
